@@ -1,1219 +1,1081 @@
-import React, { useEffect, useState } from "react";
-import { Header, NavSection } from "./components/Header";
+import React, { useState } from "react";
+import { AppScreen, Header } from "./components/Header";
 import { Footer } from "./components/Footer";
 import { SafeImage } from "./components/SafeImage";
 import { ProjectScreen } from "./components/ProjectScreen";
 import { ResumeScreen } from "./components/ResumeScreen";
-import { HERO_PORTRAIT_URL, ProjectId, ProjectTab } from "./data/portfolioData";
+import { AboutScreen } from "./components/screens/AboutScreen";
+import { SkillsScreen } from "./components/screens/SkillsScreen";
+import { ProjectsCatalogScreen } from "./components/screens/ProjectsCatalogScreen";
+import { ContactScreen } from "./components/screens/ContactScreen";
+import {
+  CONTACT_INFO,
+  HERO_PORTRAIT_URL,
+  ProjectId,
+  ProjectTab,
+} from "./data/portfolioData";
 
 export default function App() {
-  const [activeScreen, setActiveScreen] = useState<"home" | "project" | "resume">("home");
-  const [activeSection, setActiveSection] = useState<NavSection>("hero");
+  const [activeScreen, setActiveScreen] = useState<AppScreen>("home");
   const [selectedProjectId, setSelectedProjectId] = useState<ProjectId>("productivity");
   const [selectedProjectTab, setSelectedProjectTab] = useState<ProjectTab>("case-study");
-  const [codeTab, setCodeTab] = useState<"config" | "stack">("config");
 
-  // Contact form state
-  const [fullName, setFullName] = useState("");
-  const [emailAddress, setEmailAddress] = useState("");
-  const [opportunityType, setOpportunityType] = useState("internship");
-  const [messageContent, setMessageContent] = useState("");
-  const [submittedInfo, setSubmittedInfo] = useState<{
-    name: string;
-    email: string;
-    type: string;
-  } | null>(null);
-  const [copiedEmail, setCopiedEmail] = useState(false);
+  // Home screen contact form state matching the attached HTML's interactive behavior
+  const [contactName, setContactName] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [contactSubject, setContactSubject] = useState("internship");
+  const [contactMessage, setContactMessage] = useState("");
+  const [submitState, setSubmitState] = useState<"idle" | "sending" | "sent">("idle");
 
-  // Scroll-spy for home sections
-  useEffect(() => {
-    if (activeScreen !== "home") return;
-
-    const sectionIds: NavSection[] = ["hero", "skills", "about", "projects", "contact"];
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id as NavSection);
-          }
-        });
-      },
-      { rootMargin: "-30% 0px -55% 0px", threshold: 0.05 }
-    );
-
-    sectionIds.forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) observer.observe(el);
-    });
-
-    return () => observer.disconnect();
-  }, [activeScreen]);
-
-  const navigateToSection = (section: NavSection) => {
-    if (activeScreen !== "home") {
-      setActiveScreen("home");
-      setActiveSection(section);
-      window.setTimeout(() => {
-        const target = document.getElementById(section);
-        if (target) {
-          target.scrollIntoView({ behavior: "smooth" });
-        } else {
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        }
-      }, 60);
-    } else {
-      setActiveSection(section);
-      const target = document.getElementById(section);
-      if (target) {
-        target.scrollIntoView({ behavior: "smooth" });
-      }
-    }
+  const navigateScreen = (screen: AppScreen) => {
+    setActiveScreen(screen);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const openProject = (id: ProjectId, tab: ProjectTab = "case-study") => {
     setSelectedProjectId(id);
     setSelectedProjectTab(tab);
-    setActiveScreen("project");
+    setActiveScreen("project-detail");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const openResume = () => {
-    setActiveScreen("resume");
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  const handleCopyEmail = (e: React.MouseEvent) => {
+  const handleHomeContactSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    navigator.clipboard?.writeText("chibuike.david@example.com");
-    setCopiedEmail(true);
-    window.setTimeout(() => setCopiedEmail(false), 2500);
-  };
-
-  const handleContactSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmittedInfo({
-      name: fullName.trim(),
-      email: emailAddress.trim(),
-      type: opportunityType,
-    });
-    setFullName("");
-    setEmailAddress("");
-    setOpportunityType("internship");
-    setMessageContent("");
+    if (submitState === "sending") return;
+    setSubmitState("sending");
+    window.setTimeout(() => {
+      setSubmitState("sent");
+      setContactName("");
+      setContactEmail("");
+      setContactSubject("internship");
+      setContactMessage("");
+    }, 700);
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-surface font-body-md text-on-surface">
-      <Header
-        activeScreen={activeScreen}
-        activeSection={activeSection}
-        onNavigateSection={navigateToSection}
-        onOpenResume={openResume}
-      />
+    <div className="min-h-screen flex flex-col bg-surface-container-lowest font-body-md text-on-surface">
+      <Header activeScreen={activeScreen} onNavigate={navigateScreen} />
 
-      <main className="w-full pt-16 bg-surface flex-1 min-h-[calc(100vh-4rem)]">
-        {activeScreen === "project" && (
+      <main className="w-full pt-16 bg-surface-container-lowest flex-1">
+        {activeScreen === "about" && <AboutScreen onNavigate={navigateScreen} />}
+
+        {activeScreen === "skills" && <SkillsScreen onNavigate={navigateScreen} />}
+
+        {activeScreen === "projects" && (
+          <ProjectsCatalogScreen
+            onOpenProject={openProject}
+            onContact={() => navigateScreen("contact")}
+          />
+        )}
+
+        {activeScreen === "contact" && <ContactScreen />}
+
+        {activeScreen === "project-detail" && (
           <ProjectScreen
             projectId={selectedProjectId}
             activeTab={selectedProjectTab}
             onSelectProject={(id, tab) => openProject(id, tab || "case-study")}
             onChangeTab={setSelectedProjectTab}
-            onBackToPortfolio={() => navigateToSection("projects")}
-            onContactForProject={() => navigateToSection("contact")}
+            onBackToPortfolio={() => navigateScreen("projects")}
+            onContactForProject={() => navigateScreen("contact")}
           />
         )}
 
         {activeScreen === "resume" && (
           <ResumeScreen
-            onBackToPortfolio={() => navigateToSection("hero")}
+            onBackToPortfolio={() => navigateScreen("home")}
             onOpenProject={(id) => openProject(id, "case-study")}
-            onContact={() => navigateToSection("contact")}
+            onContact={() => navigateScreen("contact")}
           />
         )}
 
         {activeScreen === "home" && (
           <div className="flex flex-col w-full">
-            {/* Top Ambient Glow + 1. HERO SECTION */}
+            {/* TOP AMBIENT GLOW */}
             <div className="relative w-full overflow-hidden">
-              <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-primary-container/20 rounded-full blur-[130px] pointer-events-none" />
-              <div className="absolute top-20 right-10 w-[400px] h-[300px] bg-secondary-container/15 rounded-full blur-[110px] pointer-events-none" />
+              <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[720px] h-[360px] bg-gradient-to-b from-primary-fixed/40 via-surface-container/20 to-transparent blur-3xl pointer-events-none -z-10" />
+              <div className="absolute top-48 -right-32 w-96 h-96 bg-tertiary-fixed/30 rounded-full blur-3xl pointer-events-none -z-10" />
+            </div>
 
-              <section
-                className="relative max-w-7xl mx-auto px-6 lg:px-12 py-16 lg:py-24"
-                id="hero"
-              >
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
-                  {/* Left Column: Bio & CTA */}
-                  <div className="lg:col-span-7 flex flex-col items-start z-10">
-                    {/* Availability Indicator */}
-                    <button
-                      type="button"
-                      onClick={() => navigateToSection("contact")}
-                      className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-surface-container-high/80 hover:bg-surface-container-highest backdrop-blur-md shadow-sm mb-6 transition-colors cursor-pointer"
-                    >
-                      <span className="relative flex h-2.5 w-2.5">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75" />
-                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-secondary shadow-[0_0_8px_rgba(123,208,255,0.9)]" />
+            {/* HERO SECTION */}
+            <section className="w-full py-space-xl lg:py-24">
+              <div className="max-w-7xl mx-auto px-margin-mobile lg:px-margin-desktop">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter lg:gap-12 items-center">
+                  {/* Left Column: Executive Value Proposition */}
+                  <div className="lg:col-span-7 flex flex-col items-start gap-space-md">
+                    {/* Availability Pill */}
+                    <div className="inline-flex items-center gap-space-xs px-3.5 py-1.5 rounded-full bg-surface-container-low shadow-sm">
+                      <span className="w-2.5 h-2.5 rounded-full bg-primary-container animate-pulse" />
+                      <span className="font-label-sm text-label-sm text-primary font-semibold tracking-wide">
+                        Available for Internships &amp; Roles
                       </span>
-                      <span className="font-label-md text-label-md text-secondary font-medium tracking-wide">
-                        Open to Internships &amp; Opportunities
-                      </span>
-                    </button>
+                    </div>
 
-                    {/* Main Headline with Gradient */}
-                    <h1 className="font-display text-display-mobile sm:text-display lg:text-[3.5rem] tracking-tight text-on-surface font-bold leading-[1.12] mb-4">
-                      Hi, I&apos;m Ifediora Chibuike David. <br className="hidden sm:inline" />I
-                      Build{" "}
-                      <span className="bg-gradient-to-r from-secondary via-primary to-primary-container bg-clip-text text-transparent">
-                        Digital Experiences.
-                      </span>
-                    </h1>
-
-                    {/* University Subtitle */}
-                    <p className="font-headline-sm text-headline-sm text-secondary font-medium tracking-tight mb-4 flex items-center gap-2">
-                      <span className="material-symbols-outlined text-secondary text-[22px]">
+                    {/* Academic Affiliation Tag */}
+                    <div className="inline-flex items-center gap-2 text-on-surface-variant font-label-md text-label-md">
+                      <span className="material-symbols-outlined text-[18px] text-tertiary">
                         school
                       </span>
-                      <span>Computer Science Student at COOU Igbariam</span>
+                      <span>B.Sc. Business Administration • COOU Igbariam, Anambra State</span>
+                    </div>
+
+                    {/* Primary Hero Title */}
+                    <h1 className="font-headline-xl text-headline-xl-mobile sm:text-headline-xl text-on-surface tracking-tight leading-[1.15]">
+                      Hello, I&apos;m{" "}
+                      <span className="text-on-surface font-black">Ifediora Chibuike David</span>. I
+                      Build{" "}
+                      <span className="bg-gradient-to-r from-primary-container via-secondary to-tertiary-container bg-clip-text text-transparent">
+                        Digital Experiences
+                      </span>
+                      .
+                    </h1>
+
+                    {/* Supporting Pitch */}
+                    <p className="font-body-lg text-body-lg text-on-surface-variant max-w-2xl leading-relaxed">
+                      I&apos;m a tech enthusiast, aspiring software engineer, and digital product
+                      designer passionate about bridging rigorous business management strategies
+                      with modern, high-performance web development.
                     </p>
 
-                    {/* Supporting Narrative */}
-                    <p className="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mb-8 leading-relaxed">
-                      I&apos;m a tech enthusiast and aspiring Full-Stack Developer &amp; UI/UX
-                      Designer passionate about solving real-world problems through technology,
-                      thoughtful design, and continuous learning.
-                    </p>
-
-                    {/* Primary CTA Buttons */}
-                    <div className="flex flex-wrap items-center gap-4 w-full sm:w-auto mb-10">
+                    {/* Core Call-to-Actions */}
+                    <div className="flex flex-wrap items-center gap-space-md pt-space-xs w-full sm:w-auto">
                       <a
-                        href="#projects"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          navigateToSection("projects");
-                        }}
-                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl bg-primary-container text-on-primary-container font-label-md text-label-md font-semibold tracking-wide shadow-[0_0_24px_rgba(37,99,235,0.4)] hover:bg-inverse-primary hover:shadow-[0_0_32px_rgba(123,208,255,0.5)] transition-all duration-200 whitespace-nowrap"
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-space-lg py-3 rounded-lg bg-primary-container text-on-primary font-label-md text-label-md shadow-md hover:bg-primary transition-all duration-200 hover:-translate-y-0.5"
+                        href="#featured-projects"
                       >
-                        <span className="material-symbols-outlined text-[20px]">rocket_launch</span>
                         <span>Explore My Projects</span>
+                        <span className="material-symbols-outlined text-[18px]">
+                          arrow_downward
+                        </span>
                       </a>
                       <button
                         type="button"
-                        onClick={openResume}
-                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl bg-surface-container-high/70 hover:bg-surface-container-highest text-on-surface font-label-md text-label-md font-medium tracking-wide shadow-sm transition-all duration-200 cursor-pointer whitespace-nowrap"
+                        onClick={() => navigateScreen("resume")}
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-space-lg py-3 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md shadow-sm hover:bg-surface-container hover:text-primary transition-all duration-200 cursor-pointer"
                       >
-                        <span className="material-symbols-outlined text-[20px]">download</span>
+                        <span className="material-symbols-outlined text-[18px] text-primary">
+                          download
+                        </span>
                         <span>Download My CV</span>
                       </button>
                     </div>
 
-                    {/* Social Links */}
-                    <div className="flex items-center gap-4 text-on-surface-variant">
+                    {/* Fast Social Connect Strip */}
+                    <div className="flex flex-wrap items-center gap-space-md pt-space-sm text-on-surface-variant">
                       <span className="font-label-sm text-label-sm uppercase tracking-wider text-outline">
                         Connect:
                       </span>
                       <a
-                        aria-label="GitHub"
-                        className="h-10 w-10 rounded-lg bg-surface-container flex items-center justify-center hover:text-secondary hover:bg-surface-container-highest transition-colors shadow-sm"
-                        href="https://github.com"
+                        className="flex items-center gap-1.5 font-label-sm text-label-sm hover:text-primary transition-colors py-1 px-2 rounded-md hover:bg-surface-container-low"
+                        href={CONTACT_INFO.linkedinUrl}
                         rel="noopener noreferrer"
                         target="_blank"
                       >
-                        <span className="material-symbols-outlined text-[20px]">code</span>
+                        <span className="material-symbols-outlined text-[16px] text-primary">
+                          share
+                        </span>
+                        <span>LinkedIn</span>
                       </a>
                       <a
-                        aria-label="LinkedIn"
-                        className="h-10 w-10 rounded-lg bg-surface-container flex items-center justify-center hover:text-secondary hover:bg-surface-container-highest transition-colors shadow-sm"
-                        href="https://linkedin.com"
+                        className="flex items-center gap-1.5 font-label-sm text-label-sm hover:text-primary transition-colors py-1 px-2 rounded-md hover:bg-surface-container-low"
+                        href={CONTACT_INFO.githubUrl}
                         rel="noopener noreferrer"
                         target="_blank"
                       >
-                        <span className="material-symbols-outlined text-[20px]">hub</span>
+                        <span className="material-symbols-outlined text-[16px] text-primary">
+                          code
+                        </span>
+                        <span>GitHub</span>
                       </a>
                       <a
-                        aria-label="Twitter"
-                        className="h-10 w-10 rounded-lg bg-surface-container flex items-center justify-center hover:text-secondary hover:bg-surface-container-highest transition-colors shadow-sm"
-                        href="https://twitter.com"
-                        rel="noopener noreferrer"
-                        target="_blank"
+                        className="flex items-center gap-1.5 font-label-sm text-label-sm hover:text-primary transition-colors py-1 px-2 rounded-md hover:bg-surface-container-low"
+                        href={`mailto:${CONTACT_INFO.email}`}
                       >
-                        <span className="material-symbols-outlined text-[20px]">tag</span>
-                      </a>
-                      <a
-                        aria-label="Email"
-                        className="h-10 w-10 rounded-lg bg-surface-container flex items-center justify-center hover:text-secondary hover:bg-surface-container-highest transition-colors shadow-sm"
-                        href="mailto:chibuike.david@example.com"
-                      >
-                        <span className="material-symbols-outlined text-[20px]">mail</span>
+                        <span className="material-symbols-outlined text-[16px] text-primary">
+                          mail
+                        </span>
+                        <span>Email</span>
                       </a>
                     </div>
                   </div>
 
-                  {/* Right Column: Student Image & Code Overlay */}
-                  <div className="lg:col-span-5 relative flex justify-center lg:justify-end pb-6 lg:pb-0">
-                    <div className="relative w-full max-w-[380px] lg:max-w-[420px]">
-                      {/* Decorative Accent Behind */}
-                      <div className="absolute -inset-2 bg-gradient-to-tr from-primary-container/30 to-secondary/30 rounded-3xl blur-xl opacity-60" />
-
-                      {/* Student Photo Frame */}
-                      <div className="relative rounded-2xl overflow-hidden shadow-2xl bg-surface-container">
+                  {/* Right Column: Student Portrait & Code Telemetry */}
+                  <div className="lg:col-span-5 relative flex justify-center mt-space-lg lg:mt-0">
+                    <div className="relative w-full max-w-md bg-surface-container-low rounded-xl p-3 shadow-xl">
+                      <div className="relative w-full aspect-[3/4] overflow-hidden rounded-lg bg-surface-container">
                         <SafeImage
-                          src={HERO_PORTRAIT_URL}
-                          alt="Ifediora Chibuike David - Computer Science Student at COOU Igbariam"
+                          alt="Ifediora Chibuike David - Academic and Developer Portrait"
+                          className="w-full h-full object-cover object-top hover:scale-[1.02] transition-transform duration-500 ease-out"
                           fallbackInitials="ICD"
-                          className="w-full h-[440px] object-cover object-center saturate-[1.08] contrast-[1.03]"
+                          src={HERO_PORTRAIT_URL}
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent opacity-50 pointer-events-none" />
+                        <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-on-surface/60 to-transparent pointer-events-none" />
+                        <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-on-primary">
+                          <div>
+                            <div className="font-label-md text-label-md font-bold tracking-tight">
+                              Ifediora Chibuike David
+                            </div>
+                            <div className="font-label-sm text-label-sm text-on-primary/80">
+                              COOU Igbariam • Class of 2025
+                            </div>
+                          </div>
+                          <div className="w-8 h-8 rounded-full bg-primary-container/80 backdrop-blur-md flex items-center justify-center">
+                            <span className="material-symbols-outlined text-[18px] text-on-primary">
+                              verified
+                            </span>
+                          </div>
+                        </div>
                       </div>
 
-                      {/* Floating Tech Callouts */}
-                      <button
-                        type="button"
-                        onClick={() => navigateToSection("skills")}
-                        className="absolute -top-3 -left-4 px-3.5 py-1.5 rounded-full bg-surface-container-highest/90 hover:bg-surface-container-highest backdrop-blur-md shadow-lg flex items-center gap-1.5 text-secondary font-label-md text-label-md font-medium transition-transform hover:scale-[1.02] cursor-pointer"
-                      >
-                        <span>⚡</span>
-                        <span>React &amp; TypeScript</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => openProject("marketplace", "demo")}
-                        className="absolute top-24 -right-4 px-3.5 py-1.5 rounded-full bg-surface-container-highest/90 hover:bg-surface-container-highest backdrop-blur-md shadow-lg flex items-center gap-1.5 text-tertiary font-label-md text-label-md font-medium transition-transform hover:scale-[1.02] cursor-pointer"
-                      >
-                        <span>🎨</span>
-                        <span>Figma to Code</span>
-                      </button>
-
-                      {/* Floating Code Editor Card */}
-                      <div className="absolute -bottom-8 -left-4 sm:-left-10 right-4 sm:right-auto sm:w-[350px] bg-surface-container-lowest/95 backdrop-blur-xl rounded-xl shadow-2xl p-4 font-code-inline text-code-inline border border-outline-variant/20">
-                        {/* Window Bar */}
-                        <div className="flex items-center justify-between pb-3 mb-2.5 bg-surface-container-low/40 px-2 py-1 rounded-lg">
+                      {/* Overlaid Code Config Card */}
+                      <div className="mt-3 bg-inverse-surface rounded-lg p-3 text-inverse-on-surface shadow-md">
+                        <div className="flex items-center justify-between pb-2 mb-2 bg-inverse-surface">
                           <div className="flex items-center gap-1.5">
-                            <span className="h-2.5 w-2.5 rounded-full bg-error" />
-                            <span className="h-2.5 w-2.5 rounded-full bg-[#facc15]" />
-                            <span className="h-2.5 w-2.5 rounded-full bg-[#4ade80]" />
+                            <div className="w-2.5 h-2.5 rounded-full bg-error" />
+                            <div className="w-2.5 h-2.5 rounded-full bg-secondary-container" />
+                            <div className="w-2.5 h-2.5 rounded-full bg-tertiary-fixed" />
                           </div>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setCodeTab((prev) => (prev === "config" ? "stack" : "config"))
-                            }
-                            title="Switch code file preview"
-                            className="font-label-sm text-label-sm text-outline hover:text-secondary transition-colors cursor-pointer"
-                          >
-                            {codeTab === "config" ? "developer.config.ts" : "coou.profile.ts"}
-                          </button>
-                          <button
-                            type="button"
-                            aria-label="Toggle code snippet"
-                            onClick={() =>
-                              setCodeTab((prev) => (prev === "config" ? "stack" : "config"))
-                            }
-                            className="text-outline hover:text-secondary transition-colors cursor-pointer"
-                          >
-                            <span className="material-symbols-outlined text-[14px]">terminal</span>
-                          </button>
+                          <span className="font-label-sm text-label-sm text-outline-variant font-mono">
+                            profile.config.js
+                          </span>
                         </div>
-
-                        {/* Code Lines */}
-                        {codeTab === "config" ? (
-                          <div className="space-y-1 text-[13px] leading-relaxed select-none">
-                            <div>
-                              <span className="text-secondary">const</span>{" "}
-                              <span className="text-primary">student</span> = {"{"}
-                            </div>
-                            <div className="pl-4">
-                              <span className="text-outline">name:</span>{" "}
-                              <span className="text-[#86efac]">
-                                &quot;Ifediora Chibuike David&quot;
-                              </span>
-                              ,
-                            </div>
-                            <div className="pl-4">
-                              <span className="text-outline">institution:</span>{" "}
-                              <span className="text-[#86efac]">&quot;COOU Igbariam&quot;</span>,
-                            </div>
-                            <div className="pl-4">
-                              <span className="text-outline">focus:</span> [
-                              <span className="text-secondary">&quot;Frontend&quot;</span>,{" "}
-                              <span className="text-secondary">&quot;UI/UX&quot;</span>,{" "}
-                              <span className="text-secondary">&quot;Python&quot;</span>],
-                            </div>
-                            <div className="pl-4">
-                              <span className="text-outline">status:</span>{" "}
-                              <span className="text-tertiary">
-                                &quot;Ready for Internships &amp; Projects&quot;
-                              </span>{" "}
-                              🚀
-                            </div>
-                            <div>{"};"}</div>
-                          </div>
-                        ) : (
-                          <div className="space-y-1 text-[13px] leading-relaxed select-none">
-                            <div>
-                              <span className="text-secondary">export const</span>{" "}
-                              <span className="text-primary">academics</span> = {"{"}
-                            </div>
-                            <div className="pl-4">
-                              <span className="text-outline">degree:</span>{" "}
-                              <span className="text-[#86efac]">&quot;B.Sc Computer Science&quot;</span>,
-                            </div>
-                            <div className="pl-4">
-                              <span className="text-outline">campus:</span>{" "}
-                              <span className="text-[#86efac]">&quot;Anambra, Nigeria&quot;</span>,
-                            </div>
-                            <div className="pl-4">
-                              <span className="text-outline">shippedApps:</span>{" "}
-                              <span className="text-secondary">5</span>,
-                            </div>
-                            <div className="pl-4">
-                              <span className="text-outline">availability:</span>{" "}
-                              <span className="text-tertiary">&quot;Summer 2025 Roles&quot;</span>
-                            </div>
-                            <div>{"};"}</div>
-                          </div>
-                        )}
+                        <div className="font-code-inline text-code-inline leading-relaxed font-mono">
+                          <span className="text-tertiary-fixed-dim">const</span>{" "}
+                          <span className="text-primary-fixed">student</span> = {"{"}
+                          <br />
+                          &nbsp;&nbsp;<span className="text-secondary-fixed-dim">name</span>:{" "}
+                          <span className="text-secondary-container">
+                            &apos;Ifediora Chibuike David&apos;
+                          </span>
+                          ,
+                          <br />
+                          &nbsp;&nbsp;<span className="text-secondary-fixed-dim">institution</span>:{" "}
+                          <span className="text-secondary-container">
+                            &apos;COOU Igbariam&apos;
+                          </span>
+                          ,
+                          <br />
+                          &nbsp;&nbsp;<span className="text-secondary-fixed-dim">faculty</span>:{" "}
+                          <span className="text-secondary-container">
+                            &apos;Management Sciences&apos;
+                          </span>
+                          ,
+                          <br />
+                          &nbsp;&nbsp;<span className="text-secondary-fixed-dim">degree</span>:{" "}
+                          <span className="text-secondary-container">
+                            &apos;B.Sc. Business Admin&apos;
+                          </span>
+                          ,
+                          <br />
+                          &nbsp;&nbsp;<span className="text-secondary-fixed-dim">status</span>:{" "}
+                          <span className="text-primary-fixed-dim">
+                            &apos;Open to Roles &amp; Projects&apos;
+                          </span>
+                          <br />
+                          {"};"}
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </section>
-            </div>
+              </div>
+            </section>
 
-            {/* 2. TECHNOLOGIES I WORK WITH */}
-            <section className="w-full py-16 bg-surface-container-lowest" id="skills">
-              <div className="max-w-7xl mx-auto px-6 lg:px-12">
-                <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-4">
+            {/* TECHNOLOGIES I WORK WITH */}
+            <section className="w-full py-space-lg bg-surface-container-low">
+              <div className="max-w-7xl mx-auto px-margin-mobile lg:px-margin-desktop">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-space-xs mb-space-md">
                   <div>
-                    <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-medium">
-                      Core Tech Stack
+                    <span className="font-label-sm text-label-sm uppercase tracking-wider text-primary font-bold">
+                      Stack Overview
                     </span>
-                    <h2 className="font-headline-lg text-headline-lg text-on-surface font-semibold tracking-tight mt-1">
-                      Technologies I Work With
+                    <h2 className="font-headline-md text-headline-md text-on-surface">
+                      Technologies &amp; Workflow
                     </h2>
                   </div>
                   <p className="font-body-sm text-body-sm text-on-surface-variant max-w-md">
-                    A focused developer toolchain centered on modern web technologies, scripting
-                    fundamentals, and human-centered design.
+                    Applied tools blending clean frontend experiences, structured script logic, and
+                    strategic workflow patterns.
                   </p>
                 </div>
-
-                {/* Tech Stack Grid by Category */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
                   {/* Frontend */}
-                  <div className="bg-surface-container rounded-2xl p-6 shadow-md hover:bg-surface-container-high transition-colors">
-                    <div className="flex items-center gap-3 mb-5">
-                      <span className="h-9 w-9 rounded-lg bg-surface-container-highest flex items-center justify-center text-secondary">
-                        <span className="material-symbols-outlined text-[20px]">web</span>
-                      </span>
-                      <div>
-                        <h3 className="font-headline-sm text-headline-sm text-on-surface">
-                          Frontend
-                        </h3>
-                        <p className="font-label-sm text-label-sm text-outline">
-                          Interactive UI &amp; Web Standards
-                        </p>
+                  <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-center gap-space-xs mb-space-sm">
+                      <div className="w-8 h-8 rounded-lg bg-primary-fixed flex items-center justify-center text-primary">
+                        <span className="material-symbols-outlined text-[18px]">
+                          desktop_windows
+                        </span>
                       </div>
+                      <h3 className="font-label-md text-label-md text-on-surface font-bold">
+                        Frontend Engineering
+                      </h3>
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="flex items-center gap-2.5 p-3 rounded-xl bg-surface-container-low shadow-sm">
-                        <span className="font-label-md text-label-md text-tertiary">#</span>
-                        <span className="font-body-sm text-body-sm text-on-surface font-medium">
-                          HTML5
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2.5 p-3 rounded-xl bg-surface-container-low shadow-sm">
-                        <span className="font-label-md text-label-md text-secondary">#</span>
-                        <span className="font-body-sm text-body-sm text-on-surface font-medium">
-                          CSS3
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2.5 p-3 rounded-xl bg-surface-container-low shadow-sm">
-                        <span className="font-label-md text-label-md text-[#facc15]">JS</span>
-                        <span className="font-body-sm text-body-sm text-on-surface font-medium">
-                          JavaScript ES6+
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2.5 p-3 rounded-xl bg-surface-container-low shadow-sm">
-                        <span className="font-label-md text-label-md text-secondary">⚛</span>
-                        <span className="font-body-sm text-body-sm text-on-surface font-medium">
-                          React
-                        </span>
-                      </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      <span className="px-2.5 py-1 rounded bg-surface-container font-label-sm text-label-sm text-on-surface font-medium">
+                        HTML5 Semantic
+                      </span>
+                      <span className="px-2.5 py-1 rounded bg-surface-container font-label-sm text-label-sm text-on-surface font-medium">
+                        CSS3 Architecture
+                      </span>
+                      <span className="px-2.5 py-1 rounded bg-surface-container font-label-sm text-label-sm text-on-surface font-medium">
+                        JavaScript (ES6+)
+                      </span>
+                      <span className="px-2.5 py-1 rounded bg-primary-fixed text-primary font-label-sm text-label-sm font-semibold">
+                        React &amp; Hooks
+                      </span>
+                      <span className="px-2.5 py-1 rounded bg-surface-container font-label-sm text-label-sm text-on-surface font-medium">
+                        Tailwind CSS
+                      </span>
                     </div>
                   </div>
 
                   {/* Backend & Scripting */}
-                  <div className="bg-surface-container rounded-2xl p-6 shadow-md hover:bg-surface-container-high transition-colors">
-                    <div className="flex items-center gap-3 mb-5">
-                      <span className="h-9 w-9 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary">
-                        <span className="material-symbols-outlined text-[20px]">data_object</span>
-                      </span>
-                      <div>
-                        <h3 className="font-headline-sm text-headline-sm text-on-surface">
-                          Backend &amp; Scripting
-                        </h3>
-                        <p className="font-label-sm text-label-sm text-outline">
-                          Logic, Services &amp; APIs
-                        </p>
+                  <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-center gap-space-xs mb-space-sm">
+                      <div className="w-8 h-8 rounded-lg bg-secondary-fixed flex items-center justify-center text-secondary">
+                        <span className="material-symbols-outlined text-[18px]">database</span>
                       </div>
+                      <h3 className="font-label-md text-label-md text-on-surface font-bold">
+                        Backend &amp; Scripting
+                      </h3>
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="flex items-center gap-2.5 p-3 rounded-xl bg-surface-container-low shadow-sm col-span-2 sm:col-span-1">
-                        <span className="font-label-md text-label-md text-secondary">🐍</span>
-                        <span className="font-body-sm text-body-sm text-on-surface font-medium">
-                          Python
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2.5 p-3 rounded-xl bg-surface-container-low shadow-sm col-span-2 sm:col-span-1">
-                        <span className="font-label-md text-label-md text-[#86efac]">🟢</span>
-                        <span className="font-body-sm text-body-sm text-on-surface font-medium">
-                          Node.js <span className="text-outline text-xs">(Learning)</span>
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2.5 p-3 rounded-xl bg-surface-container-low shadow-sm col-span-2">
-                        <span className="font-label-md text-label-md text-primary">⚡</span>
-                        <span className="font-body-sm text-body-sm text-on-surface font-medium">
-                          RESTful API Integration
-                        </span>
-                      </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      <span className="px-2.5 py-1 rounded bg-surface-container font-label-sm text-label-sm text-on-surface font-medium">
+                        Python Programming
+                      </span>
+                      <span className="px-2.5 py-1 rounded bg-surface-container font-label-sm text-label-sm text-on-surface font-medium">
+                        RESTful API Integration
+                      </span>
+                      <span className="px-2.5 py-1 rounded bg-secondary-fixed text-secondary font-label-sm text-label-sm font-semibold">
+                        Node.js (Learning)
+                      </span>
+                      <span className="px-2.5 py-1 rounded bg-surface-container font-label-sm text-label-sm text-on-surface font-medium">
+                        JSON Data Modeling
+                      </span>
                     </div>
                   </div>
 
-                  {/* Tools & Workflow */}
-                  <div className="bg-surface-container rounded-2xl p-6 shadow-md hover:bg-surface-container-high transition-colors">
-                    <div className="flex items-center gap-3 mb-5">
-                      <span className="h-9 w-9 rounded-lg bg-surface-container-highest flex items-center justify-center text-tertiary">
-                        <span className="material-symbols-outlined text-[20px]">construction</span>
-                      </span>
-                      <div>
-                        <h3 className="font-headline-sm text-headline-sm text-on-surface">
-                          Tools &amp; Workflow
-                        </h3>
-                        <p className="font-label-sm text-label-sm text-outline">
-                          Design &amp; Developer Tooling
-                        </p>
+                  {/* Workflow & Tools */}
+                  <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-center gap-space-xs mb-space-sm">
+                      <div className="w-8 h-8 rounded-lg bg-tertiary-fixed flex items-center justify-center text-tertiary">
+                        <span className="material-symbols-outlined text-[18px]">construction</span>
                       </div>
+                      <h3 className="font-label-md text-label-md text-on-surface font-bold">
+                        Tools &amp; Workflow
+                      </h3>
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="flex items-center gap-2.5 p-3 rounded-xl bg-surface-container-low shadow-sm">
-                        <span className="font-label-md text-label-md text-tertiary">🐙</span>
-                        <span className="font-body-sm text-body-sm text-on-surface font-medium">
-                          Git &amp; GitHub
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2.5 p-3 rounded-xl bg-surface-container-low shadow-sm">
-                        <span className="font-label-md text-label-md text-secondary">💻</span>
-                        <span className="font-body-sm text-body-sm text-on-surface font-medium">
-                          VS Code
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2.5 p-3 rounded-xl bg-surface-container-low shadow-sm col-span-2">
-                        <span className="font-label-md text-label-md text-[#f472b6]">🎨</span>
-                        <span className="font-body-sm text-body-sm text-on-surface font-medium">
-                          Figma UI / Prototyping
-                        </span>
-                      </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      <span className="px-2.5 py-1 rounded bg-surface-container font-label-sm text-label-sm text-on-surface font-medium">
+                        Git Version Control
+                      </span>
+                      <span className="px-2.5 py-1 rounded bg-surface-container font-label-sm text-label-sm text-on-surface font-medium">
+                        GitHub Workflows
+                      </span>
+                      <span className="px-2.5 py-1 rounded bg-surface-container font-label-sm text-label-sm text-on-surface font-medium">
+                        VS Code Config
+                      </span>
+                      <span className="px-2.5 py-1 rounded bg-tertiary-fixed text-tertiary font-label-sm text-label-sm font-semibold">
+                        Figma Prototyping
+                      </span>
                     </div>
                   </div>
                 </div>
               </div>
             </section>
 
-            {/* 3. ABOUT ME SECTION */}
-            <section className="w-full py-20 bg-surface" id="about">
-              <div className="max-w-7xl mx-auto px-6 lg:px-12">
-                {/* Top Overview Card with University Stamp */}
-                <div className="bg-surface-container-low rounded-3xl p-8 lg:p-12 mb-10 shadow-xl relative overflow-hidden">
-                  <div className="absolute -right-12 -top-12 w-64 h-64 bg-primary-container/10 rounded-full blur-3xl pointer-events-none" />
-                  <div className="max-w-3xl">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container-highest text-secondary font-label-md text-label-md font-medium mb-4">
-                      <span className="material-symbols-outlined text-[16px]">person</span>
-                      <span>A Little About Me</span>
+            {/* ABOUT ME SECTION */}
+            <section className="w-full py-space-xl lg:py-24">
+              <div className="max-w-7xl mx-auto px-margin-mobile lg:px-margin-desktop">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter lg:gap-12">
+                  {/* Left: Narrative and Profile Context */}
+                  <div className="lg:col-span-5 flex flex-col gap-space-sm">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-secondary-fixed/50 w-fit">
+                      <span className="material-symbols-outlined text-[16px] text-secondary">
+                        pin_drop
+                      </span>
+                      <span className="font-label-sm text-label-sm text-secondary font-semibold">
+                        Anambra State, Nigeria • Faculty of Management Sciences
+                      </span>
                     </div>
-                    <h2 className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight mb-4">
-                      About Me
+                    <h2 className="font-headline-lg text-headline-lg-mobile sm:text-headline-lg text-on-surface tracking-tight">
+                      A Little About Me
                     </h2>
-                    <p className="font-body-lg text-body-lg text-on-surface leading-relaxed mb-6">
-                      I&apos;m a motivated university student at Chukwuemeka Odumegwu Ojukwu
-                      University (COOU) Igbariam building practical software and design skills. I
-                      love turning complex problems into intuitive digital solutions and thrive on
-                      hands-on project building.
+                    <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                      I am currently pursuing a Bachelor of Science in Business Administration at
+                      Chukwuemeka Odumegwu Ojukwu University (COOU), Igbariam campus. My academic
+                      journey sharpens my strategic acumen in organisational behavior, operational
+                      systems, and financial frameworks.
                     </p>
-                    <div className="flex flex-wrap items-center gap-6 pt-2 font-label-md text-label-md text-on-surface-variant">
-                      <div className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-secondary text-[18px]">
-                          location_on
-                        </span>
-                        <span>Anambra State, Nigeria</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-secondary text-[18px]">
-                          menu_book
-                        </span>
-                        <span>B.Sc Computer Science Student</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-secondary text-[18px]">
-                          verified
-                        </span>
-                        <span>COOU Igbariam Scholar</span>
+                    <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                      Simultaneously, I channel relentless curiosity into modern software
+                      development and digital user experience design. This cross-disciplinary
+                      synergy gives me an uncommon edge: understanding both the quantitative
+                      business rationale and the software architecture necessary to ship impactful
+                      software.
+                    </p>
+                    <div className="mt-space-sm p-space-md rounded-xl bg-surface-container-low flex items-start gap-space-sm">
+                      <span className="material-symbols-outlined text-primary text-[24px]">
+                        lightbulb
+                      </span>
+                      <div>
+                        <div className="font-label-md text-label-md text-on-surface font-bold">
+                          The Strategic Advantage
+                        </div>
+                        <div className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+                          Where business process clarity guides clean front-end interaction models.
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                {/* 3 Informative Feature Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="bg-surface-container rounded-2xl p-7 flex flex-col justify-between shadow-md hover:bg-surface-container-high transition-all">
-                    <div>
-                      <div className="h-12 w-12 rounded-xl bg-primary-container/20 text-primary flex items-center justify-center mb-6">
-                        <span className="material-symbols-outlined text-[26px]">psychology</span>
+                  {/* Right: 3 Structured Strategic Cards */}
+                  <div className="lg:col-span-7 flex flex-col gap-space-md justify-center">
+                    <div className="p-space-md rounded-xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-all group">
+                      <div className="flex items-start gap-space-md">
+                        <div className="w-12 h-12 rounded-xl bg-primary-fixed flex items-center justify-center shrink-0 group-hover:bg-primary-container transition-colors">
+                          <span className="material-symbols-outlined text-primary group-hover:text-on-primary transition-colors text-[24px]">
+                            code_blocks
+                          </span>
+                        </div>
+                        <div>
+                          <span className="font-label-sm text-label-sm uppercase tracking-wider text-primary font-bold">
+                            Continuous Growth
+                          </span>
+                          <h3 className="font-headline-sm text-headline-sm text-on-surface font-semibold mb-1">
+                            Currently Learning
+                          </h3>
+                          <p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+                            Diving deep into component lifecycle design, advanced React patterns,
+                            state management fundamentals, and backend Node.js APIs to build
+                            cohesive end-to-end applications.
+                          </p>
+                        </div>
                       </div>
-                      <h3 className="font-headline-sm text-headline-sm text-on-surface font-semibold mb-3">
-                        Currently Learning
-                      </h3>
-                      <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
-                        Deep diving into advanced React state management, Next.js application
-                        architecture, asynchronous programming, and RESTful API integrations.
-                      </p>
                     </div>
-                    <div className="mt-6 pt-4 flex items-center gap-2 text-secondary font-label-md text-label-md">
-                      <span>Next milestone: Full-Stack microservices</span>
-                      <span className="material-symbols-outlined text-[16px]">trending_up</span>
-                    </div>
-                  </div>
 
-                  <div className="bg-surface-container rounded-2xl p-7 flex flex-col justify-between shadow-md hover:bg-surface-container-high transition-all">
-                    <div>
-                      <div className="h-12 w-12 rounded-xl bg-secondary-container/20 text-secondary flex items-center justify-center mb-6">
-                        <span className="material-symbols-outlined text-[26px]">devices</span>
+                    <div className="p-space-md rounded-xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-all group">
+                      <div className="flex items-start gap-space-md">
+                        <div className="w-12 h-12 rounded-xl bg-secondary-fixed flex items-center justify-center shrink-0 group-hover:bg-secondary-container transition-colors">
+                          <span className="material-symbols-outlined text-secondary group-hover:text-on-secondary-container transition-colors text-[24px]">
+                            rocket_launch
+                          </span>
+                        </div>
+                        <div>
+                          <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-bold">
+                            Applied Passion
+                          </span>
+                          <h3 className="font-headline-sm text-headline-sm text-on-surface font-semibold mb-1">
+                            What I Enjoy Building
+                          </h3>
+                          <p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+                            Focused on pragmatic campus utilities, student productivity enhancers,
+                            responsive web dashboards, and community marketplaces that eliminate
+                            friction in everyday Nigerian university workflows.
+                          </p>
+                        </div>
                       </div>
-                      <h3 className="font-headline-sm text-headline-sm text-on-surface font-semibold mb-3">
-                        What I Enjoy Building
-                      </h3>
-                      <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
-                        Interactive web apps, real-world student utility tools, responsive digital
-                        interfaces, and accessible design systems crafted with high precision.
-                      </p>
                     </div>
-                    <div className="mt-6 pt-4 flex items-center gap-2 text-secondary font-label-md text-label-md">
-                      <span>Focus: Speed, aesthetics &amp; UX</span>
-                      <span className="material-symbols-outlined text-[16px]">speed</span>
-                    </div>
-                  </div>
 
-                  <div className="bg-surface-container rounded-2xl p-7 flex flex-col justify-between shadow-md hover:bg-surface-container-high transition-all">
-                    <div>
-                      <div className="h-12 w-12 rounded-xl bg-tertiary-container/30 text-tertiary flex items-center justify-center mb-6">
-                        <span className="material-symbols-outlined text-[26px]">flag</span>
+                    <div className="p-space-md rounded-xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-all group">
+                      <div className="flex items-start gap-space-md">
+                        <div className="w-12 h-12 rounded-xl bg-tertiary-fixed flex items-center justify-center shrink-0 group-hover:bg-tertiary-container transition-colors">
+                          <span className="material-symbols-outlined text-tertiary group-hover:text-on-tertiary-container transition-colors text-[24px]">
+                            flag
+                          </span>
+                        </div>
+                        <div>
+                          <span className="font-label-sm text-label-sm uppercase tracking-wider text-tertiary font-bold">
+                            Future Direction
+                          </span>
+                          <h3 className="font-headline-sm text-headline-sm text-on-surface font-semibold mb-1">
+                            My Career Goal
+                          </h3>
+                          <p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+                            Securing internship and software engineering roles within
+                            high-performance teams across Nigerian and global tech/fintech
+                            ecosystems where I can contribute actively and elevate my craftsmanship.
+                          </p>
+                        </div>
                       </div>
-                      <h3 className="font-headline-sm text-headline-sm text-on-surface font-semibold mb-3">
-                        My Career Goal
-                      </h3>
-                      <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
-                        Securing software engineering internships, collaborating on innovative
-                        global engineering teams, and creating impactful technology for emerging
-                        African markets.
-                      </p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => navigateToSection("contact")}
-                      className="mt-6 pt-4 flex items-center gap-2 text-tertiary hover:text-on-surface font-label-md text-label-md transition-colors cursor-pointer w-fit"
-                    >
-                      <span>Ready for summer 2025 roles</span>
-                      <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
-                    </button>
                   </div>
                 </div>
               </div>
             </section>
 
-            {/* 4. FEATURED PROJECTS SECTION */}
-            <section className="w-full py-20 bg-surface-container-lowest" id="projects">
-              <div className="max-w-7xl mx-auto px-6 lg:px-12">
-                {/* Section Header */}
-                <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-14 gap-4">
+            {/* FEATURED PROJECTS */}
+            <section
+              className="w-full py-space-xl lg:py-24 bg-surface-container-low"
+              id="featured-projects"
+            >
+              <div className="max-w-7xl mx-auto px-margin-mobile lg:px-margin-desktop">
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-space-sm mb-space-xl">
                   <div>
-                    <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-medium">
-                      Featured Work
-                    </span>
-                    <h2 className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight mt-1">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-primary-fixed/50 font-label-sm text-label-sm text-primary font-bold mb-space-xs">
+                      <span className="material-symbols-outlined text-[16px]">folder_special</span>
+                      <span>Portfolio Highlights</span>
+                    </div>
+                    <h2 className="font-headline-lg text-headline-lg-mobile sm:text-headline-lg text-on-surface tracking-tight">
                       Projects That Bring Ideas to Life
                     </h2>
                   </div>
-                  <p className="font-body-sm text-body-sm text-on-surface-variant max-w-sm">
-                    A showcase of practical web applications and digital interfaces built with
-                    modern developer workflows.
+                  <p className="font-body-md text-body-md text-on-surface-variant max-w-md">
+                    A selection of real-world conceptual software designed with an emphasis on
+                    clarity, operational utility, and human interaction.
                   </p>
                 </div>
 
-                {/* 3-Card Responsive Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
                   {/* Project 1: Student Productivity App */}
-                  <div className="bg-surface-container rounded-2xl overflow-hidden shadow-lg flex flex-col justify-between group hover:bg-surface-container-high transition-all duration-300">
-                    <div>
-                      <div
-                        onClick={() => openProject("productivity", "demo")}
-                        role="button"
-                        tabIndex={0}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ")
-                            openProject("productivity", "demo");
-                        }}
-                        className="bg-surface-container-low p-5 relative overflow-hidden h-56 flex flex-col justify-between cursor-pointer"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-label-sm text-label-sm text-secondary font-medium">
-                            Academic Suite v1.2
-                          </span>
-                          <span className="material-symbols-outlined text-[18px] text-outline">
-                            timer
-                          </span>
-                        </div>
-
-                        <div className="bg-surface-container-highest/90 rounded-xl p-3.5 shadow-md space-y-2.5">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <span className="h-2 w-2 rounded-full bg-secondary" />
-                              <span className="font-label-md text-label-md text-on-surface font-semibold">
-                                CMP 312: Algorithms
-                              </span>
-                            </div>
-                            <span className="font-code-inline text-[11px] text-tertiary bg-surface-container-low px-2 py-0.5 rounded">
-                              24:15 Pomodoro
-                            </span>
-                          </div>
-                          <div className="w-full bg-surface-container-low h-1.5 rounded-full overflow-hidden">
-                            <div className="bg-secondary h-full rounded-full w-3/4" />
-                          </div>
-                          <div className="flex justify-between text-[11px] font-label-sm text-on-surface-variant">
-                            <span>3 tasks remaining</span>
-                            <span>75% daily goal</span>
-                          </div>
-                        </div>
-
-                        <div className="flex gap-2">
-                          <span className="px-2 py-0.5 rounded bg-surface-container text-[11px] font-label-sm text-on-surface-variant">
-                            COOU Timetable
-                          </span>
-                          <span className="px-2 py-0.5 rounded bg-surface-container text-[11px] font-label-sm text-on-surface-variant">
-                            Assignment Queue
-                          </span>
-                        </div>
+                  <div className="flex flex-col bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all group">
+                    <div
+                      onClick={() => openProject("productivity", "demo")}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") openProject("productivity", "demo");
+                      }}
+                      className="relative w-full h-48 bg-gradient-to-br from-primary-fixed to-surface-container-high p-4 flex flex-col justify-between overflow-hidden cursor-pointer"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-surface-container-lowest/90 text-primary">
+                          v1.2.0 • ACADEMIC TOOL
+                        </span>
+                        <span className="material-symbols-outlined text-primary text-[20px]">
+                          timer
+                        </span>
                       </div>
-
-                      <div className="p-6">
-                        <h3 className="font-headline-md text-headline-md text-on-surface font-semibold mb-2 group-hover:text-primary transition-colors">
-                          Student Productivity App
-                        </h3>
-                        <p className="font-body-md text-body-md text-on-surface-variant mb-6 leading-relaxed">
-                          A comprehensive web app helping university students organize academic
-                          schedules, assignment deadlines, and focused study sessions with Pomodoro
-                          integration.
-                        </p>
-                        <div className="flex flex-wrap gap-2 mb-6">
-                          {["UI Design", "JavaScript", "LocalStorage", "Tailwind CSS"].map(
-                            (tag) => (
-                              <span
-                                key={tag}
-                                className="font-code-inline text-[12px] px-2.5 py-1 rounded-md bg-surface-container-low text-secondary font-medium"
-                              >
-                                {tag}
-                              </span>
-                            )
-                          )}
+                      <div className="bg-surface-container-lowest/95 rounded-lg p-3 shadow-md backdrop-blur-sm -mb-8 transition-transform group-hover:-translate-y-2 duration-300">
+                        <div className="flex items-center justify-between pb-2 mb-2 bg-surface-container-lowest">
+                          <span className="font-label-sm text-label-sm font-bold text-on-surface">
+                            Pomodoro &amp; Deadline Tracker
+                          </span>
+                          <span className="w-2 h-2 rounded-full bg-primary-container" />
+                        </div>
+                        <div className="space-y-1.5">
+                          <div className="h-2 rounded-full bg-primary-fixed w-3/4" />
+                          <div className="h-2 rounded-full bg-surface-container w-1/2" />
                         </div>
                       </div>
                     </div>
 
-                    <div className="px-6 pb-6 pt-2 flex items-center justify-between">
-                      <button
-                        type="button"
-                        onClick={() => openProject("productivity", "case-study")}
-                        className="inline-flex items-center gap-1.5 font-label-md text-label-md text-secondary hover:text-primary transition-colors font-medium cursor-pointer"
-                      >
-                        <span>View Case Study</span>
-                        <span className="material-symbols-outlined text-[16px]">arrow_outward</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => openProject("productivity", "architecture")}
-                        className="inline-flex items-center gap-1.5 font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer"
-                      >
-                        <span className="material-symbols-outlined text-[16px]">code</span>
-                        <span>GitHub Code</span>
-                      </button>
+                    <div className="p-space-lg flex-1 flex flex-col justify-between pt-space-xl">
+                      <div>
+                        <div className="flex flex-wrap gap-1.5 mb-space-xs">
+                          <span className="px-2 py-0.5 rounded bg-surface-container font-label-sm text-label-sm text-on-surface font-medium">
+                            UI Design
+                          </span>
+                          <span className="px-2 py-0.5 rounded bg-surface-container font-label-sm text-label-sm text-on-surface font-medium">
+                            JavaScript
+                          </span>
+                          <span className="px-2 py-0.5 rounded bg-primary-fixed text-primary font-label-sm text-label-sm font-semibold">
+                            Productivity
+                          </span>
+                        </div>
+                        <h3 className="font-headline-sm text-headline-sm text-on-surface font-bold group-hover:text-primary transition-colors">
+                          Student Productivity App
+                        </h3>
+                        <p className="font-body-sm text-body-sm text-on-surface-variant mt-space-xs leading-relaxed">
+                          A focused academic task management tool featuring semester milestone
+                          tracking, assignment countdowns, and customizable Pomodoro study cycles
+                          tailored for Nigerian university schedules.
+                        </p>
+                      </div>
+                      <div className="pt-space-md mt-space-md flex items-center justify-between">
+                        <button
+                          type="button"
+                          onClick={() => openProject("productivity", "case-study")}
+                          className="font-label-md text-label-md text-primary font-bold inline-flex items-center gap-1 hover:underline cursor-pointer"
+                        >
+                          <span>View Case Study</span>
+                          <span className="material-symbols-outlined text-[16px]">
+                            arrow_forward
+                          </span>
+                        </button>
+                        <button
+                          type="button"
+                          title="Inspect Architecture & Code"
+                          onClick={() => openProject("productivity", "architecture")}
+                          className="text-on-surface-variant hover:text-on-surface p-1 cursor-pointer"
+                        >
+                          <span className="material-symbols-outlined text-[20px]">code</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
 
                   {/* Project 2: Personal Finance Dashboard */}
-                  <div className="bg-surface-container rounded-2xl overflow-hidden shadow-lg flex flex-col justify-between group hover:bg-surface-container-high transition-all duration-300">
-                    <div>
-                      <div
-                        onClick={() => openProject("finance", "demo")}
-                        role="button"
-                        tabIndex={0}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") openProject("finance", "demo");
-                        }}
-                        className="bg-surface-container-low p-5 relative overflow-hidden h-56 flex flex-col justify-between cursor-pointer"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-label-sm text-label-sm text-secondary font-medium">
-                            Finance Tracker OS
-                          </span>
-                          <span className="material-symbols-outlined text-[18px] text-outline">
-                            analytics
-                          </span>
-                        </div>
-
-                        <div className="bg-surface-container-highest/90 rounded-xl p-3.5 shadow-md">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="font-label-sm text-[11px] text-on-surface-variant uppercase">
-                              Monthly Budget Flow
-                            </span>
-                            <span className="font-code-inline text-[11px] text-secondary font-semibold">
-                              +18.4% saved
-                            </span>
-                          </div>
-                          <svg
-                            className="w-full h-12 text-primary"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 200 48"
-                          >
-                            <path
-                              className="text-secondary"
-                              d="M0 40 L30 35 L60 22 L90 28 L120 12 L150 18 L180 8 L200 14"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2.5"
-                            />
-                            <path
-                              d="M0 40 L30 35 L60 22 L90 28 L120 12 L150 18 L180 8 L200 14 L200 48 L0 48 Z"
-                              fill="currentColor"
-                              opacity="0.12"
-                            />
-                          </svg>
-                          <div className="flex justify-between items-center mt-2 text-[10px] font-label-sm text-outline">
-                            <span>Allowance: ₦45,000</span>
-                            <span>Savings: ₦12,500</span>
-                          </div>
-                        </div>
-
-                        <div className="flex gap-2">
-                          <span className="px-2 py-0.5 rounded bg-surface-container text-[11px] font-label-sm text-on-surface-variant">
-                            Expense Breakdown
-                          </span>
-                          <span className="px-2 py-0.5 rounded bg-surface-container text-[11px] font-label-sm text-on-surface-variant">
-                            Target Goals
-                          </span>
-                        </div>
+                  <div className="flex flex-col bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all group">
+                    <div
+                      onClick={() => openProject("finance", "demo")}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") openProject("finance", "demo");
+                      }}
+                      className="relative w-full h-48 bg-gradient-to-br from-secondary-fixed to-surface-container-high p-4 flex flex-col justify-between overflow-hidden cursor-pointer"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-surface-container-lowest/90 text-secondary">
+                          FINANCE MATRIX
+                        </span>
+                        <span className="material-symbols-outlined text-secondary text-[20px]">
+                          query_stats
+                        </span>
                       </div>
-
-                      <div className="p-6">
-                        <h3 className="font-headline-md text-headline-md text-on-surface font-semibold mb-2 group-hover:text-primary transition-colors">
-                          Personal Finance Dashboard
-                        </h3>
-                        <p className="font-body-md text-body-md text-on-surface-variant mb-6 leading-relaxed">
-                          A modern analytics concept empowering young adults to visualize spending
-                          patterns, track monthly allowance budgets, and set savings targets.
-                        </p>
-                        <div className="flex flex-wrap gap-2 mb-6">
-                          {[
-                            "React",
-                            "Data Visualisation",
-                            "Chart.js",
-                            "Responsive Design",
-                          ].map((tag) => (
-                            <span
-                              key={tag}
-                              className="font-code-inline text-[12px] px-2.5 py-1 rounded-md bg-surface-container-low text-secondary font-medium"
-                            >
-                              {tag}
-                            </span>
-                          ))}
+                      <div className="bg-surface-container-lowest/95 rounded-lg p-3 shadow-md backdrop-blur-sm -mb-8 transition-transform group-hover:-translate-y-2 duration-300">
+                        <div className="flex items-center justify-between pb-2 mb-2 bg-surface-container-lowest">
+                          <span className="font-label-sm text-label-sm font-bold text-on-surface">
+                            Monthly Net Flow
+                          </span>
+                          <span className="text-[11px] font-bold text-secondary font-mono">
+                            +18.4%
+                          </span>
+                        </div>
+                        <div className="flex items-end gap-1.5 h-8 pt-1">
+                          <div className="w-full bg-secondary-fixed-dim h-4 rounded-t" />
+                          <div className="w-full bg-secondary-container h-7 rounded-t" />
+                          <div className="w-full bg-secondary h-8 rounded-t" />
+                          <div className="w-full bg-secondary-fixed h-5 rounded-t" />
                         </div>
                       </div>
                     </div>
 
-                    <div className="px-6 pb-6 pt-2 flex items-center justify-between">
-                      <button
-                        type="button"
-                        onClick={() => openProject("finance", "case-study")}
-                        className="inline-flex items-center gap-1.5 font-label-md text-label-md text-secondary hover:text-primary transition-colors font-medium cursor-pointer"
-                      >
-                        <span>View Case Study</span>
-                        <span className="material-symbols-outlined text-[16px]">arrow_outward</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => openProject("finance", "demo")}
-                        className="inline-flex items-center gap-1.5 font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer"
-                      >
-                        <span className="material-symbols-outlined text-[16px]">visibility</span>
-                        <span>Live Demo</span>
-                      </button>
+                    <div className="p-space-lg flex-1 flex flex-col justify-between pt-space-xl">
+                      <div>
+                        <div className="flex flex-wrap gap-1.5 mb-space-xs">
+                          <span className="px-2 py-0.5 rounded bg-surface-container font-label-sm text-label-sm text-on-surface font-medium">
+                            React
+                          </span>
+                          <span className="px-2 py-0.5 rounded bg-secondary-fixed text-secondary font-label-sm text-label-sm font-semibold">
+                            Data Visualization
+                          </span>
+                          <span className="px-2 py-0.5 rounded bg-surface-container font-label-sm text-label-sm text-on-surface font-medium">
+                            Responsive
+                          </span>
+                        </div>
+                        <h3 className="font-headline-sm text-headline-sm text-on-surface font-bold group-hover:text-secondary transition-colors">
+                          Personal Finance Dashboard
+                        </h3>
+                        <p className="font-body-sm text-body-sm text-on-surface-variant mt-space-xs leading-relaxed">
+                          Data-driven financial utility analyzing cash flow, expense categorisation,
+                          and goal tracking. Built with component reusability and responsive visual
+                          charts in mind.
+                        </p>
+                      </div>
+                      <div className="pt-space-md mt-space-md flex items-center justify-between">
+                        <button
+                          type="button"
+                          onClick={() => openProject("finance", "case-study")}
+                          className="font-label-md text-label-md text-secondary font-bold inline-flex items-center gap-1 hover:underline cursor-pointer"
+                        >
+                          <span>View Case Study</span>
+                          <span className="material-symbols-outlined text-[16px]">
+                            arrow_forward
+                          </span>
+                        </button>
+                        <button
+                          type="button"
+                          title="Launch Interactive Demo"
+                          onClick={() => openProject("finance", "demo")}
+                          className="text-on-surface-variant hover:text-on-surface p-1 cursor-pointer"
+                        >
+                          <span className="material-symbols-outlined text-[20px]">launch</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
 
                   {/* Project 3: Campus Marketplace */}
-                  <div className="bg-surface-container rounded-2xl overflow-hidden shadow-lg flex flex-col justify-between group hover:bg-surface-container-high transition-all duration-300">
-                    <div>
-                      <div
-                        onClick={() => openProject("marketplace", "demo")}
-                        role="button"
-                        tabIndex={0}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ")
-                            openProject("marketplace", "demo");
-                        }}
-                        className="bg-surface-container-low p-5 relative overflow-hidden h-56 flex flex-col justify-between cursor-pointer"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-label-sm text-label-sm text-secondary font-medium">
-                            Peer Commerce P2P
-                          </span>
-                          <span className="material-symbols-outlined text-[18px] text-outline">
-                            shopping_bag
-                          </span>
-                        </div>
-
-                        <div className="bg-surface-container-highest/90 rounded-xl p-3 shadow-md space-y-2">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <span className="h-6 w-6 rounded-full bg-secondary-container/40 flex items-center justify-center text-[10px] text-secondary font-bold">
-                                CO
-                              </span>
-                              <div>
-                                <div className="text-[12px] font-semibold text-on-surface">
-                                  Data Structures &amp; Alg. in C++
-                                </div>
-                                <div className="text-[10px] text-outline">
-                                  Seller: Faculty of Physical Sciences
-                                </div>
-                              </div>
-                            </div>
-                            <span className="text-[11px] font-code-inline font-bold text-secondary">
-                              ₦3,500
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2 pt-1">
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-primary-container/20 text-primary text-[10px] font-label-sm">
-                              <span className="material-symbols-outlined text-[12px]">
-                                verified
-                              </span>
-                              Verified Student
-                            </span>
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-low text-on-surface-variant text-[10px] font-label-sm">
-                              <span className="material-symbols-outlined text-[12px]">near_me</span>
-                              Igbariam Campus
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="flex gap-2">
-                          <span className="px-2 py-0.5 rounded bg-surface-container text-[11px] font-label-sm text-on-surface-variant">
-                            Escrow Security
-                          </span>
-                          <span className="px-2 py-0.5 rounded bg-surface-container text-[11px] font-label-sm text-on-surface-variant">
-                            Instant Chat
-                          </span>
-                        </div>
+                  <div className="flex flex-col bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all group">
+                    <div
+                      onClick={() => openProject("marketplace", "demo")}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") openProject("marketplace", "demo");
+                      }}
+                      className="relative w-full h-48 bg-gradient-to-br from-tertiary-fixed to-surface-container-high p-4 flex flex-col justify-between overflow-hidden cursor-pointer"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-surface-container-lowest/90 text-tertiary">
+                          P2P EXCHANGE
+                        </span>
+                        <span className="material-symbols-outlined text-tertiary text-[20px]">
+                          storefront
+                        </span>
                       </div>
-
-                      <div className="p-6">
-                        <h3 className="font-headline-md text-headline-md text-on-surface font-semibold mb-2 group-hover:text-primary transition-colors">
-                          Campus Marketplace
-                        </h3>
-                        <p className="font-body-md text-body-md text-on-surface-variant mb-6 leading-relaxed">
-                          A student-centric peer-to-peer exchange platform for buying, selling, and
-                          swapping textbooks, electronics, and campus essentials safely.
-                        </p>
-                        <div className="flex flex-wrap gap-2 mb-6">
-                          {["Web Development", "UX Research", "Prototyping", "Figma"].map(
-                            (tag) => (
-                              <span
-                                key={tag}
-                                className="font-code-inline text-[12px] px-2.5 py-1 rounded-md bg-surface-container-low text-secondary font-medium"
-                              >
-                                {tag}
-                              </span>
-                            )
-                          )}
+                      <div className="bg-surface-container-lowest/95 rounded-lg p-3 shadow-md backdrop-blur-sm -mb-8 transition-transform group-hover:-translate-y-2 duration-300">
+                        <div className="flex items-center justify-between pb-2 mb-2 bg-surface-container-lowest">
+                          <span className="font-label-sm text-label-sm font-bold text-on-surface">
+                            COOU Peer Marketplace
+                          </span>
+                          <span className="text-[11px] font-bold text-tertiary">Verified</span>
+                        </div>
+                        <div className="flex gap-2">
+                          <div className="w-8 h-8 rounded bg-tertiary-fixed flex items-center justify-center text-tertiary text-[12px] font-bold">
+                            B.Sc
+                          </div>
+                          <div className="flex-1 space-y-1">
+                            <div className="h-2 rounded-full bg-tertiary-fixed-dim w-4/5" />
+                            <div className="h-2 rounded-full bg-surface-container w-3/5" />
+                          </div>
                         </div>
                       </div>
                     </div>
 
-                    <div className="px-6 pb-6 pt-2 flex items-center justify-between">
-                      <button
-                        type="button"
-                        onClick={() => openProject("marketplace", "case-study")}
-                        className="inline-flex items-center gap-1.5 font-label-md text-label-md text-secondary hover:text-primary transition-colors font-medium cursor-pointer"
-                      >
-                        <span>View Case Study</span>
-                        <span className="material-symbols-outlined text-[16px]">arrow_outward</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => openProject("marketplace", "demo")}
-                        className="inline-flex items-center gap-1.5 font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer"
-                      >
-                        <span className="material-symbols-outlined text-[16px]">open_in_new</span>
-                        <span>Prototype</span>
-                      </button>
+                    <div className="p-space-lg flex-1 flex flex-col justify-between pt-space-xl">
+                      <div>
+                        <div className="flex flex-wrap gap-1.5 mb-space-xs">
+                          <span className="px-2 py-0.5 rounded bg-surface-container font-label-sm text-label-sm text-on-surface font-medium">
+                            Web Dev
+                          </span>
+                          <span className="px-2 py-0.5 rounded bg-tertiary-fixed text-tertiary font-label-sm text-label-sm font-semibold">
+                            UX Research
+                          </span>
+                          <span className="px-2 py-0.5 rounded bg-surface-container font-label-sm text-label-sm text-on-surface font-medium">
+                            Prototyping
+                          </span>
+                        </div>
+                        <h3 className="font-headline-sm text-headline-sm text-on-surface font-bold group-hover:text-tertiary transition-colors">
+                          Campus Marketplace
+                        </h3>
+                        <p className="font-body-sm text-body-sm text-on-surface-variant mt-space-xs leading-relaxed">
+                          A localized peer-to-peer textbook and student essentials exchange created
+                          for Chukwuemeka Odumegwu Ojukwu University students to securely trade
+                          course literature and gear.
+                        </p>
+                      </div>
+                      <div className="pt-space-md mt-space-md flex items-center justify-between">
+                        <button
+                          type="button"
+                          onClick={() => openProject("marketplace", "case-study")}
+                          className="font-label-md text-label-md text-tertiary font-bold inline-flex items-center gap-1 hover:underline cursor-pointer"
+                        >
+                          <span>View Case Study</span>
+                          <span className="material-symbols-outlined text-[16px]">
+                            arrow_forward
+                          </span>
+                        </button>
+                        <button
+                          type="button"
+                          title="Preview Interactive Prototype"
+                          onClick={() => openProject("marketplace", "demo")}
+                          className="text-on-surface-variant hover:text-on-surface p-1 cursor-pointer"
+                        >
+                          <span className="material-symbols-outlined text-[20px]">preview</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </section>
 
-            {/* 5. SKILLS & STRENGTHS SECTION */}
-            <section className="w-full py-20 bg-surface">
-              <div className="max-w-7xl mx-auto px-6 lg:px-12">
-                <div className="text-center max-w-2xl mx-auto mb-14">
-                  <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-medium">
-                    Competencies
+            {/* MY SKILLS & TOOLKIT */}
+            <section className="w-full py-space-xl lg:py-24">
+              <div className="max-w-7xl mx-auto px-margin-mobile lg:px-margin-desktop">
+                <div className="flex flex-col items-center text-center max-w-2xl mx-auto mb-space-xl">
+                  <span className="font-label-sm text-label-sm uppercase tracking-wider text-primary font-bold">
+                    Competency Matrix
                   </span>
-                  <h2 className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight mt-1">
+                  <h2 className="font-headline-lg text-headline-lg-mobile sm:text-headline-lg text-on-surface mt-1">
                     My Skills &amp; Toolkit
                   </h2>
-                  <p className="font-body-md text-body-md text-on-surface-variant mt-3">
-                    Practical technical proficiencies and interpersonal strengths developed through
-                    rigorous academic projects and self-guided engineering.
+                  <p className="font-body-md text-body-md text-on-surface-variant mt-space-xs">
+                    Transparent evaluation of hands-on tools, frameworks, design processes, and
+                    professional business capabilities.
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
                   {/* Column 1: Development */}
-                  <div className="bg-surface-container-low rounded-2xl p-7 shadow-lg flex flex-col gap-6">
-                    <div className="flex items-center gap-3">
-                      <span className="h-10 w-10 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center shadow-sm">
-                        <span className="material-symbols-outlined text-[22px]">code</span>
-                      </span>
+                  <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+                    <div className="flex items-center gap-space-sm pb-space-sm bg-surface-container-lowest">
+                      <div className="w-10 h-10 rounded-lg bg-primary-fixed flex items-center justify-center text-primary">
+                        <span className="material-symbols-outlined">terminal</span>
+                      </div>
                       <div>
-                        <h3 className="font-headline-sm text-headline-sm text-on-surface font-semibold">
+                        <h3 className="font-headline-sm text-headline-sm text-on-surface font-bold">
                           Development
                         </h3>
-                        <p className="font-label-sm text-label-sm text-outline">
-                          Core programming stack
+                        <p className="font-body-sm text-body-sm text-on-surface-variant">
+                          Front-End &amp; Core Logic
                         </p>
                       </div>
                     </div>
-                    <div className="flex flex-col gap-3">
-                      {[
-                        ["HTML5 & Semantic Web", "Proficient"],
-                        ["CSS3 & Tailwind CSS", "Advanced"],
-                        ["JavaScript (ES6+)", "Proficient"],
-                        ["React & Component Arch", "Proficient"],
-                        ["Python Programming", "Academic Core"],
-                        ["Git Version Control", "Workflow"],
-                      ].map(([skill, level]) => (
-                        <div
-                          key={skill}
-                          className="flex items-center justify-between p-3 rounded-xl bg-surface-container shadow-sm"
-                        >
-                          <span className="font-body-sm text-body-sm text-on-surface font-medium">
-                            {skill}
-                          </span>
-                          <span className="font-label-md text-label-md text-secondary">
-                            {level}
-                          </span>
-                        </div>
-                      ))}
+                    <div className="flex flex-col gap-space-xs">
+                      <div className="flex items-center justify-between p-2 rounded-lg bg-surface-container-low">
+                        <span className="font-body-sm text-body-sm text-on-surface font-medium">
+                          HTML &amp; Semantic Web
+                        </span>
+                        <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-primary-fixed text-primary">
+                          Proficient
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between p-2 rounded-lg bg-surface-container-low">
+                        <span className="font-body-sm text-body-sm text-on-surface font-medium">
+                          CSS3 &amp; Tailwind CSS
+                        </span>
+                        <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-primary-container text-on-primary">
+                          Advanced
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between p-2 rounded-lg bg-surface-container-low">
+                        <span className="font-body-sm text-body-sm text-on-surface font-medium">
+                          JavaScript ES6+
+                        </span>
+                        <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-primary-fixed text-primary">
+                          Proficient
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between p-2 rounded-lg bg-surface-container-low">
+                        <span className="font-body-sm text-body-sm text-on-surface font-medium">
+                          React &amp; Components
+                        </span>
+                        <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-primary-fixed text-primary">
+                          Proficient
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between p-2 rounded-lg bg-surface-container-low">
+                        <span className="font-body-sm text-body-sm text-on-surface font-medium">
+                          Python
+                        </span>
+                        <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-surface-container text-on-surface">
+                          Academic Core
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between p-2 rounded-lg bg-surface-container-low">
+                        <span className="font-body-sm text-body-sm text-on-surface font-medium">
+                          Git Version Control
+                        </span>
+                        <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-primary-fixed text-primary">
+                          Workflow
+                        </span>
+                      </div>
                     </div>
                   </div>
 
                   {/* Column 2: Design */}
-                  <div className="bg-surface-container-low rounded-2xl p-7 shadow-lg flex flex-col gap-6">
-                    <div className="flex items-center gap-3">
-                      <span className="h-10 w-10 rounded-xl bg-secondary-container text-on-secondary-container flex items-center justify-center shadow-sm">
-                        <span className="material-symbols-outlined text-[22px]">brush</span>
-                      </span>
+                  <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+                    <div className="flex items-center gap-space-sm pb-space-sm bg-surface-container-lowest">
+                      <div className="w-10 h-10 rounded-lg bg-secondary-fixed flex items-center justify-center text-secondary">
+                        <span className="material-symbols-outlined">draw</span>
+                      </div>
                       <div>
-                        <h3 className="font-headline-sm text-headline-sm text-on-surface font-semibold">
-                          Design
+                        <h3 className="font-headline-sm text-headline-sm text-on-surface font-bold">
+                          Design &amp; UX
                         </h3>
-                        <p className="font-label-sm text-label-sm text-outline">
-                          User experience &amp; visual systems
+                        <p className="font-body-sm text-body-sm text-on-surface-variant">
+                          Interface &amp; Layout Systems
                         </p>
                       </div>
                     </div>
-                    <div className="flex flex-col gap-3">
-                      {[
-                        ["Figma UI Workspace", "Advanced"],
-                        ["Wireframing & Flowcharts", "Proficient"],
-                        ["Rapid Interactive Prototyping", "Proficient"],
-                        ["Responsive Layout Design", "Specialist"],
-                        ["Design Systems & Tokens", "Practitioner"],
-                        ["Accessibility & Contrast", "Standard"],
-                      ].map(([skill, level]) => (
-                        <div
-                          key={skill}
-                          className="flex items-center justify-between p-3 rounded-xl bg-surface-container shadow-sm"
-                        >
-                          <span className="font-body-sm text-body-sm text-on-surface font-medium">
-                            {skill}
-                          </span>
-                          <span className="font-label-md text-label-md text-secondary">
-                            {level}
-                          </span>
-                        </div>
-                      ))}
+                    <div className="flex flex-col gap-space-xs">
+                      <div className="flex items-center justify-between p-2 rounded-lg bg-surface-container-low">
+                        <span className="font-body-sm text-body-sm text-on-surface font-medium">
+                          Figma UI / Design System
+                        </span>
+                        <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-secondary-container text-on-secondary-container">
+                          Advanced
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between p-2 rounded-lg bg-surface-container-low">
+                        <span className="font-body-sm text-body-sm text-on-surface font-medium">
+                          Wireframing &amp; Sitemaps
+                        </span>
+                        <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-secondary-fixed text-secondary">
+                          Proficient
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between p-2 rounded-lg bg-surface-container-low">
+                        <span className="font-body-sm text-body-sm text-on-surface font-medium">
+                          Interactive Prototyping
+                        </span>
+                        <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-secondary-fixed text-secondary">
+                          Proficient
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between p-2 rounded-lg bg-surface-container-low">
+                        <span className="font-body-sm text-body-sm text-on-surface font-medium">
+                          Responsive Layouts
+                        </span>
+                        <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-secondary-container text-on-secondary-container">
+                          Specialist
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between p-2 rounded-lg bg-surface-container-low">
+                        <span className="font-body-sm text-body-sm text-on-surface font-medium">
+                          UI Accessibility Standards
+                        </span>
+                        <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-surface-container text-on-surface">
+                          Standard
+                        </span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Column 3: Professional & Soft Skills */}
-                  <div className="bg-surface-container-low rounded-2xl p-7 shadow-lg flex flex-col gap-6">
-                    <div className="flex items-center gap-3">
-                      <span className="h-10 w-10 rounded-xl bg-tertiary-container text-on-tertiary-container flex items-center justify-center shadow-sm">
-                        <span className="material-symbols-outlined text-[22px]">diversity_3</span>
-                      </span>
+                  {/* Column 3: Professional & Strategy */}
+                  <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+                    <div className="flex items-center gap-space-sm pb-space-sm bg-surface-container-lowest">
+                      <div className="w-10 h-10 rounded-lg bg-tertiary-fixed flex items-center justify-center text-tertiary">
+                        <span className="material-symbols-outlined">analytics</span>
+                      </div>
                       <div>
-                        <h3 className="font-headline-sm text-headline-sm text-on-surface font-semibold">
-                          Professional
+                        <h3 className="font-headline-sm text-headline-sm text-on-surface font-bold">
+                          Strategy &amp; Soft Skills
                         </h3>
-                        <p className="font-label-sm text-label-sm text-outline">
-                          Execution &amp; collaboration
+                        <p className="font-body-sm text-body-sm text-on-surface-variant">
+                          Business &amp; Communication
                         </p>
                       </div>
                     </div>
-                    <div className="flex flex-col gap-3">
-                      {[
-                        ["Analytical Problem Solving", "Core Strength"],
-                        ["Technical Communication", "Effective"],
-                        ["Cross-Functional Collaboration", "Team Player"],
-                        ["Curiosity & Continuous Learning", "Drive"],
-                        ["Self-Directed Research", "Academic"],
-                        ["Project Delivery Timelines", "Disciplined"],
-                      ].map(([skill, level]) => (
-                        <div
-                          key={skill}
-                          className="flex items-center justify-between p-3 rounded-xl bg-surface-container shadow-sm"
-                        >
-                          <span className="font-body-sm text-body-sm text-on-surface font-medium">
-                            {skill}
-                          </span>
-                          <span className="font-label-md text-label-md text-tertiary">{level}</span>
-                        </div>
-                      ))}
+                    <div className="flex flex-col gap-space-xs">
+                      <div className="flex items-center justify-between p-2 rounded-lg bg-surface-container-low">
+                        <span className="font-body-sm text-body-sm text-on-surface font-medium">
+                          Analytical Problem Solving
+                        </span>
+                        <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-tertiary-fixed text-tertiary">
+                          Core Strength
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between p-2 rounded-lg bg-surface-container-low">
+                        <span className="font-body-sm text-body-sm text-on-surface font-medium">
+                          Technical Communication
+                        </span>
+                        <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-tertiary-fixed text-tertiary">
+                          Effective
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between p-2 rounded-lg bg-surface-container-low">
+                        <span className="font-body-sm text-body-sm text-on-surface font-medium">
+                          Cross-Functional Synergy
+                        </span>
+                        <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-tertiary-fixed text-tertiary">
+                          Team Player
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between p-2 rounded-lg bg-surface-container-low">
+                        <span className="font-body-sm text-body-sm text-on-surface font-medium">
+                          Project Delivery Timelines
+                        </span>
+                        <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-tertiary-fixed text-tertiary">
+                          Disciplined
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between p-2 rounded-lg bg-surface-container-low">
+                        <span className="font-body-sm text-body-sm text-on-surface font-medium">
+                          Organizational Strategy
+                        </span>
+                        <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-surface-container text-on-surface">
+                          B.Sc Focus
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </section>
 
-            {/* 6. LEARNING JOURNEY TIMELINE */}
-            <section className="w-full py-20 bg-surface-container-lowest">
-              <div className="max-w-4xl mx-auto px-6 lg:px-12">
-                <div className="text-center mb-16">
-                  <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-medium">
-                    Milestones
+            {/* LEARNING JOURNEY TIMELINE */}
+            <section className="w-full py-space-xl lg:py-24 bg-surface-container-low">
+              <div className="max-w-4xl mx-auto px-margin-mobile lg:px-margin-desktop">
+                <div className="text-center mb-space-xl">
+                  <span className="font-label-sm text-label-sm uppercase tracking-wider text-primary font-bold">
+                    Chronology
                   </span>
-                  <h2 className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight mt-1">
+                  <h2 className="font-headline-lg text-headline-lg-mobile sm:text-headline-lg text-on-surface mt-1">
                     My Journey So Far
                   </h2>
-                  <p className="font-body-md text-body-md text-on-surface-variant mt-2">
-                    From writing my first block of HTML to engineering reactive software and seeking
-                    industry impact.
+                  <p className="font-body-md text-body-md text-on-surface-variant max-w-xl mx-auto mt-space-xs">
+                    An ongoing evolution of continuous learning, foundational academic study, and
+                    tangible software craft.
                   </p>
                 </div>
 
-                <div className="relative pl-6 sm:pl-8 space-y-12">
-                  {/* Connecting Vertical Background Line */}
-                  <div className="absolute top-3 bottom-3 left-[15px] sm:left-[19px] w-0.5 bg-surface-container-highest" />
+                <div className="relative pl-6 md:pl-8 space-y-12">
+                  <div className="absolute top-2 bottom-2 left-2 md:left-2.5 w-0.5 bg-surface-container-highest" />
 
-                  {/* Milestone 1 */}
-                  <div className="relative flex items-start gap-6 group">
-                    <div className="absolute -left-[23px] sm:-left-[27px] mt-1.5 h-4 w-4 rounded-full bg-surface-container-highest flex items-center justify-center">
-                      <span className="h-2 w-2 rounded-full bg-secondary shadow-[0_0_8px_rgba(123,208,255,0.8)]" />
+                  <div className="relative group">
+                    <div className="absolute -left-[27px] md:-left-[29px] top-1.5 w-5 h-5 rounded-full bg-surface-container-lowest flex items-center justify-center shadow-sm">
+                      <div className="w-2.5 h-2.5 rounded-full bg-outline group-hover:scale-125 transition-transform" />
                     </div>
-                    <div className="bg-surface-container rounded-2xl p-6 shadow-md w-full">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-2">
-                        <h3 className="font-headline-sm text-headline-sm text-on-surface font-semibold">
-                          First Lines of Code &amp; Foundations
-                        </h3>
-                        <span className="font-label-md text-label-md text-secondary font-medium">
-                          2022 – 2023
-                        </span>
-                      </div>
-                      <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
-                        Discovered programming, mastered core HTML/CSS semantic fundamentals,
-                        learned responsive design patterns, and built early static landing pages and
-                        portfolio drafts.
+                    <div className="bg-surface-container-lowest p-space-md md:p-space-lg rounded-xl shadow-sm">
+                      <span className="px-2.5 py-0.5 rounded font-mono text-[12px] font-bold bg-surface-container text-on-surface-variant">
+                        2022 — 2023
+                      </span>
+                      <h3 className="font-headline-sm text-headline-sm text-on-surface font-bold mt-2">
+                        First Lines of Code &amp; Foundations
+                      </h3>
+                      <p className="font-body-sm text-body-sm text-on-surface-variant mt-1 leading-relaxed">
+                        Discovered a passion for programming. Immersed in foundational semantic
+                        HTML5, CSS responsive layouts, and vanilla JavaScript fundamentals, building
+                        static personal tools and experiments.
                       </p>
                     </div>
                   </div>
 
-                  {/* Milestone 2 */}
-                  <div className="relative flex items-start gap-6 group">
-                    <div className="absolute -left-[23px] sm:-left-[27px] mt-1.5 h-4 w-4 rounded-full bg-surface-container-highest flex items-center justify-center">
-                      <span className="h-2 w-2 rounded-full bg-secondary shadow-[0_0_8px_rgba(123,208,255,0.8)]" />
+                  <div className="relative group">
+                    <div className="absolute -left-[27px] md:-left-[29px] top-1.5 w-5 h-5 rounded-full bg-surface-container-lowest flex items-center justify-center shadow-sm">
+                      <div className="w-2.5 h-2.5 rounded-full bg-secondary group-hover:scale-125 transition-transform" />
                     </div>
-                    <div className="bg-surface-container rounded-2xl p-6 shadow-md w-full">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-2">
-                        <h3 className="font-headline-sm text-headline-sm text-on-surface font-semibold">
-                          Academic Growth at COOU Igbariam
-                        </h3>
-                        <span className="font-label-md text-label-md text-secondary font-medium">
-                          2023 – 2024
-                        </span>
-                      </div>
-                      <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
-                        Commenced Computer Science degree at Chukwuemeka Odumegwu Ojukwu University.
-                        Completed core algorithms, data structures coursework, discrete math, and
-                        computer architecture modules with strong performance.
+                    <div className="bg-surface-container-lowest p-space-md md:p-space-lg rounded-xl shadow-sm">
+                      <span className="px-2.5 py-0.5 rounded font-mono text-[12px] font-bold bg-secondary-fixed text-secondary">
+                        2023 — 2024
+                      </span>
+                      <h3 className="font-headline-sm text-headline-sm text-on-surface font-bold mt-2">
+                        Academic Growth at COOU Igbariam
+                      </h3>
+                      <p className="font-body-sm text-body-sm text-on-surface-variant mt-1 leading-relaxed">
+                        Commenced intensive B.Sc. studies in Business Administration under the
+                        Faculty of Management Sciences. Synthesized business analysis, management
+                        information workflows, and programmatic problem solving.
                       </p>
                     </div>
                   </div>
 
-                  {/* Milestone 3 */}
-                  <div className="relative flex items-start gap-6 group">
-                    <div className="absolute -left-[23px] sm:-left-[27px] mt-1.5 h-4 w-4 rounded-full bg-surface-container-highest flex items-center justify-center">
-                      <span className="h-2 w-2 rounded-full bg-secondary shadow-[0_0_8px_rgba(123,208,255,0.8)]" />
+                  <div className="relative group">
+                    <div className="absolute -left-[27px] md:-left-[29px] top-1.5 w-5 h-5 rounded-full bg-surface-container-lowest flex items-center justify-center shadow-sm">
+                      <div className="w-2.5 h-2.5 rounded-full bg-tertiary-container group-hover:scale-125 transition-transform" />
                     </div>
-                    <div className="bg-surface-container rounded-2xl p-6 shadow-md w-full">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-2">
-                        <h3 className="font-headline-sm text-headline-sm text-on-surface font-semibold">
-                          Interactive Applications &amp; UI/UX
-                        </h3>
-                        <span className="font-label-md text-label-md text-secondary font-medium">
-                          2024
-                        </span>
-                      </div>
-                      <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
-                        Deepened JavaScript mastery, transitioned to building single-page
-                        applications with React, adopted Figma for rapid wireframing and
-                        prototyping, and shipped 5+ personal projects.
+                    <div className="bg-surface-container-lowest p-space-md md:p-space-lg rounded-xl shadow-sm">
+                      <span className="px-2.5 py-0.5 rounded font-mono text-[12px] font-bold bg-tertiary-fixed text-tertiary">
+                        2024
+                      </span>
+                      <h3 className="font-headline-sm text-headline-sm text-on-surface font-bold mt-2">
+                        Interactive Applications &amp; UI/UX
+                      </h3>
+                      <p className="font-body-sm text-body-sm text-on-surface-variant mt-1 leading-relaxed">
+                        Transitioned to single-page applications using React, modern component
+                        architecture, and advanced Figma prototyping. Engineered pragmatic web
+                        utilities for student productivity.
                       </p>
                     </div>
                   </div>
 
-                  {/* Milestone 4 */}
-                  <div className="relative flex items-start gap-6 group">
-                    <div className="absolute -left-[23px] sm:-left-[27px] mt-1.5 h-4 w-4 rounded-full bg-secondary/30 flex items-center justify-center">
-                      <span className="h-2 w-2 rounded-full bg-secondary animate-ping" />
+                  <div className="relative group">
+                    <div className="absolute -left-[27px] md:-left-[29px] top-1.5 w-5 h-5 rounded-full bg-surface-container-lowest flex items-center justify-center shadow-sm ring-4 ring-primary/20">
+                      <div className="w-2.5 h-2.5 rounded-full bg-primary-container animate-pulse" />
                     </div>
-                    <div className="bg-surface-container-high rounded-2xl p-6 shadow-xl w-full">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-2">
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-headline-sm text-headline-sm text-on-surface font-semibold">
-                            Seeking Opportunities &amp; Full-Stack Growth
-                          </h3>
-                          <span className="px-2 py-0.5 rounded-full bg-primary-container text-on-primary-container font-label-sm text-label-sm">
-                            Active
-                          </span>
-                        </div>
-                        <span className="font-label-md text-label-md text-secondary font-medium">
-                          Present
+                    <div className="bg-surface-container-lowest p-space-md md:p-space-lg rounded-xl shadow-sm ring-1 ring-primary/10">
+                      <div className="flex items-center gap-2">
+                        <span className="px-2.5 py-0.5 rounded font-mono text-[12px] font-bold bg-primary-fixed text-primary">
+                          PRESENT
+                        </span>
+                        <span className="flex items-center gap-1 font-label-sm text-label-sm text-primary font-bold">
+                          <span className="w-1.5 h-1.5 rounded-full bg-primary-container" />
+                          Active Search
                         </span>
                       </div>
-                      <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
-                        Expanding full-stack capabilities with backend APIs and Next.js, actively
-                        contributing to campus developer communities, and eager to secure software
-                        engineering internships and collaborative junior roles.
+                      <h3 className="font-headline-sm text-headline-sm text-on-surface font-bold mt-2">
+                        Seeking Opportunities &amp; Professional Growth
+                      </h3>
+                      <p className="font-body-sm text-body-sm text-on-surface-variant mt-1 leading-relaxed">
+                        Ready to bring energy, high-velocity learning, and business-grounded
+                        frontend engineering to developer internships, contract builds, and
+                        forward-thinking collaborative tech teams.
                       </p>
                     </div>
                   </div>
@@ -1221,248 +1083,234 @@ export default function App() {
               </div>
             </section>
 
-            {/* 7. CONTACT & GET IN TOUCH SECTION */}
-            <section className="w-full py-20 bg-surface relative overflow-hidden" id="contact">
-              <div className="absolute -bottom-20 left-1/3 w-[500px] h-[300px] bg-primary-container/15 rounded-full blur-[140px] pointer-events-none" />
-              <div className="max-w-7xl mx-auto px-6 lg:px-12 relative z-10">
-                <div className="max-w-2xl mb-14">
-                  <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-medium">
-                    Get in Touch
-                  </span>
-                  <h2 className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight mt-1">
-                    Have an Opportunity or Project in Mind?
-                  </h2>
-                  <p className="font-body-lg text-body-lg text-on-surface-variant mt-3">
-                    I&apos;m always interested in learning, collaborating, and building something
-                    meaningful. Let&apos;s connect.
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-                  {/* Left: Contact Details Card */}
-                  <div className="lg:col-span-5 bg-surface-container-low rounded-3xl p-8 shadow-xl flex flex-col justify-between space-y-8">
+            {/* CONTACT & ENGAGEMENT SECTION */}
+            <section className="w-full py-space-xl lg:py-24" id="contact">
+              <div className="max-w-7xl mx-auto px-margin-mobile lg:px-margin-desktop">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter lg:gap-12">
+                  <div className="lg:col-span-5 flex flex-col justify-between gap-space-lg">
                     <div>
-                      <h3 className="font-headline-sm text-headline-sm text-on-surface font-semibold mb-2">
-                        Let&apos;s build together
-                      </h3>
-                      <p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed mb-6">
-                        Whether you are an engineering lead looking for an intern, a fellow student
-                        with a startup idea, or an organization building tech solutions, my inbox is
-                        open.
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-primary-fixed/50 font-label-sm text-label-sm text-primary font-bold mb-space-xs">
+                        <span className="material-symbols-outlined text-[16px]">chat</span>
+                        <span>Get In Touch</span>
+                      </div>
+                      <h2 className="font-headline-lg text-headline-lg-mobile sm:text-headline-lg text-on-surface tracking-tight">
+                        Have an Opportunity or Project in Mind?
+                      </h2>
+                      <p className="font-body-md text-body-md text-on-surface-variant mt-space-sm leading-relaxed">
+                        I&apos;m always interested in learning, collaborating, and building
+                        something meaningful. Whether it&apos;s an internship, software project, or
+                        tech dialogue, my inbox is open.
                       </p>
+                    </div>
 
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between gap-2 p-3.5 rounded-xl bg-surface-container hover:bg-surface-container-high transition-colors group">
-                          <a
-                            className="flex items-center gap-4 min-w-0"
-                            href="mailto:chibuike.david@example.com"
-                          >
-                            <span className="h-10 w-10 rounded-lg bg-surface-container-highest flex items-center justify-center text-secondary group-hover:bg-primary-container group-hover:text-on-primary-container transition-colors shrink-0">
-                              <span className="material-symbols-outlined text-[20px]">mail</span>
-                            </span>
-                            <div className="min-w-0">
-                              <span className="font-label-sm text-label-sm text-outline uppercase">
-                                Direct Email
-                              </span>
-                              <div className="font-body-md text-body-md text-on-surface font-medium truncate">
-                                chibuike.david@example.com
-                              </div>
-                            </div>
-                          </a>
-                          <button
-                            type="button"
-                            onClick={handleCopyEmail}
-                            title="Copy email address"
-                            className="px-2.5 py-1 rounded-lg bg-surface-container-highest text-secondary font-label-sm text-label-sm hover:bg-primary-container hover:text-on-primary-container transition-colors cursor-pointer shrink-0"
-                          >
-                            {copiedEmail ? "Copied" : "Copy"}
-                          </button>
-                        </div>
-
-                        <a
-                          className="flex items-center gap-4 p-3.5 rounded-xl bg-surface-container hover:bg-surface-container-high transition-colors group"
-                          href="https://linkedin.com"
-                          rel="noopener noreferrer"
-                          target="_blank"
-                        >
-                          <span className="h-10 w-10 rounded-lg bg-surface-container-highest flex items-center justify-center text-secondary group-hover:bg-primary-container group-hover:text-on-primary-container transition-colors shrink-0">
-                            <span className="material-symbols-outlined text-[20px]">hub</span>
-                          </span>
-                          <div>
-                            <span className="font-label-sm text-label-sm text-outline uppercase">
-                              Professional Profile
-                            </span>
-                            <div className="font-body-md text-body-md text-on-surface font-medium">
-                              linkedin.com/in/chibuike-david
-                            </div>
+                    <div className="flex flex-col gap-space-sm">
+                      <a
+                        className="p-space-md rounded-xl bg-surface-container-low hover:bg-surface-container flex items-center justify-between transition-colors group"
+                        href={`mailto:${CONTACT_INFO.email}`}
+                      >
+                        <div className="flex items-center gap-space-sm min-w-0">
+                          <div className="w-10 h-10 rounded-lg bg-surface-container-lowest flex items-center justify-center text-primary shadow-sm shrink-0">
+                            <span className="material-symbols-outlined">mail</span>
                           </div>
-                        </a>
-
-                        <a
-                          className="flex items-center gap-4 p-3.5 rounded-xl bg-surface-container hover:bg-surface-container-high transition-colors group"
-                          href="https://github.com"
-                          rel="noopener noreferrer"
-                          target="_blank"
-                        >
-                          <span className="h-10 w-10 rounded-lg bg-surface-container-highest flex items-center justify-center text-secondary group-hover:bg-primary-container group-hover:text-on-primary-container transition-colors shrink-0">
-                            <span className="material-symbols-outlined text-[20px]">code</span>
-                          </span>
-                          <div>
-                            <span className="font-label-sm text-label-sm text-outline uppercase">
-                              Code Repository
-                            </span>
-                            <div className="font-body-md text-body-md text-on-surface font-medium">
-                              github.com/ifediora-david
+                          <div className="min-w-0">
+                            <div className="font-label-sm text-label-sm text-outline">
+                              Email Address
                             </div>
-                          </div>
-                        </a>
-
-                        <div className="flex items-center gap-4 p-3.5 rounded-xl bg-surface-container">
-                          <span className="h-10 w-10 rounded-lg bg-surface-container-highest flex items-center justify-center text-secondary shrink-0">
-                            <span className="material-symbols-outlined text-[20px]">pin_drop</span>
-                          </span>
-                          <div>
-                            <span className="font-label-sm text-label-sm text-outline uppercase">
-                              Current Base
-                            </span>
-                            <div className="font-body-md text-body-md text-on-surface font-medium">
-                              COOU Igbariam / Anambra, Nigeria
+                            <div className="font-label-md text-label-md text-on-surface font-bold group-hover:text-primary transition-colors truncate">
+                              {CONTACT_INFO.email}
                             </div>
                           </div>
                         </div>
+                        <span className="material-symbols-outlined text-outline-variant group-hover:text-primary transition-colors shrink-0">
+                          arrow_outward
+                        </span>
+                      </a>
+
+                      <a
+                        className="p-space-md rounded-xl bg-surface-container-low hover:bg-surface-container flex items-center justify-between transition-colors group"
+                        href={CONTACT_INFO.linkedinUrl}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
+                        <div className="flex items-center gap-space-sm min-w-0">
+                          <div className="w-10 h-10 rounded-lg bg-surface-container-lowest flex items-center justify-center text-primary shadow-sm shrink-0">
+                            <span className="material-symbols-outlined">share</span>
+                          </div>
+                          <div className="min-w-0">
+                            <div className="font-label-sm text-label-sm text-outline">
+                              LinkedIn Profile
+                            </div>
+                            <div className="font-label-md text-label-md text-on-surface font-bold group-hover:text-primary transition-colors truncate">
+                              {CONTACT_INFO.linkedinHandle}
+                            </div>
+                          </div>
+                        </div>
+                        <span className="material-symbols-outlined text-outline-variant group-hover:text-primary transition-colors shrink-0">
+                          arrow_outward
+                        </span>
+                      </a>
+
+                      <div className="p-space-md rounded-xl bg-surface-container-low flex items-center justify-between">
+                        <div className="flex items-center gap-space-sm">
+                          <div className="w-10 h-10 rounded-lg bg-surface-container-lowest flex items-center justify-center text-primary shadow-sm shrink-0">
+                            <span className="material-symbols-outlined">location_on</span>
+                          </div>
+                          <div>
+                            <div className="font-label-sm text-label-sm text-outline">Location</div>
+                            <div className="font-label-md text-label-md text-on-surface font-bold">
+                              {CONTACT_INFO.location}
+                            </div>
+                          </div>
+                        </div>
+                        <span className="material-symbols-outlined text-outline-variant shrink-0">
+                          public
+                        </span>
                       </div>
                     </div>
 
-                    {/* University Verification Badge */}
-                    <div className="p-4 rounded-2xl bg-surface-container flex items-center gap-3">
-                      <span className="material-symbols-outlined text-secondary text-[24px]">
-                        school
+                    <div className="p-space-md rounded-xl bg-surface-container text-on-surface-variant flex items-center gap-space-sm">
+                      <span className="material-symbols-outlined text-primary text-[24px] shrink-0">
+                        verified_user
                       </span>
-                      <div className="text-[12px] leading-tight text-on-surface-variant">
-                        <span className="font-semibold text-on-surface">
-                          Chukwuemeka Odumegwu Ojukwu University
-                        </span>
-                        <p>Faculty of Physical Sciences, Computer Science</p>
-                      </div>
+                      <p className="font-body-sm text-body-sm leading-snug">
+                        Chukwuemeka Odumegwu Ojukwu University • Faculty of Management Sciences
+                      </p>
                     </div>
                   </div>
 
-                  {/* Right: Message Form */}
-                  <div className="lg:col-span-7 bg-surface-container rounded-3xl p-8 lg:p-10 shadow-xl">
-                    <form className="space-y-6" onSubmit={handleContactSubmit}>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <div className="space-y-2">
+                  {/* Interactive Direct Message Form */}
+                  <div className="lg:col-span-7 bg-surface-container-low p-space-md sm:p-space-xl rounded-2xl shadow-sm">
+                    <h3 className="font-headline-md text-headline-md text-on-surface mb-1">
+                      Send a Message
+                    </h3>
+                    <p className="font-body-sm text-body-sm text-on-surface-variant mb-space-lg">
+                      Fill out this brief form and I will get back to you promptly.
+                    </p>
+                    <form
+                      className="flex flex-col gap-space-md"
+                      onSubmit={handleHomeContactSubmit}
+                    >
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
+                        <div className="flex flex-col gap-1.5">
                           <label
-                            className="font-label-md text-label-md text-on-surface-variant font-medium"
-                            htmlFor="full-name"
+                            className="font-label-sm text-label-sm text-on-surface font-semibold"
+                            htmlFor="contact-name"
                           >
                             Full Name
                           </label>
                           <input
-                            className="w-full bg-surface-container-lowest text-on-surface placeholder:text-outline px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary transition-all font-body-sm text-body-sm shadow-inner"
-                            id="full-name"
-                            value={fullName}
-                            onChange={(e) => setFullName(e.target.value)}
-                            placeholder="e.g. Ada Lovelace"
+                            className="w-full px-space-md py-2.5 rounded-lg bg-surface-container-lowest text-on-surface font-body-sm text-body-sm outline-none focus:ring-2 focus:ring-primary-container shadow-sm transition-all"
+                            id="contact-name"
+                            value={contactName}
+                            onChange={(e) => {
+                              setContactName(e.target.value);
+                              if (submitState === "sent") setSubmitState("idle");
+                            }}
+                            placeholder="e.g. David Eze"
                             required
                             type="text"
                           />
                         </div>
-
-                        <div className="space-y-2">
+                        <div className="flex flex-col gap-1.5">
                           <label
-                            className="font-label-md text-label-md text-on-surface-variant font-medium"
-                            htmlFor="email-address"
+                            className="font-label-sm text-label-sm text-on-surface font-semibold"
+                            htmlFor="contact-email"
                           >
                             Email Address
                           </label>
                           <input
-                            className="w-full bg-surface-container-lowest text-on-surface placeholder:text-outline px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary transition-all font-body-sm text-body-sm shadow-inner"
-                            id="email-address"
-                            value={emailAddress}
-                            onChange={(e) => setEmailAddress(e.target.value)}
-                            placeholder="you@organization.com"
+                            className="w-full px-space-md py-2.5 rounded-lg bg-surface-container-lowest text-on-surface font-body-sm text-body-sm outline-none focus:ring-2 focus:ring-primary-container shadow-sm transition-all"
+                            id="contact-email"
+                            value={contactEmail}
+                            onChange={(e) => {
+                              setContactEmail(e.target.value);
+                              if (submitState === "sent") setSubmitState("idle");
+                            }}
+                            placeholder="e.g. david@example.com"
                             required
                             type="email"
                           />
                         </div>
                       </div>
 
-                      <div className="space-y-2">
+                      <div className="flex flex-col gap-1.5">
                         <label
-                          className="font-label-md text-label-md text-on-surface-variant font-medium"
-                          htmlFor="opportunity-type"
+                          className="font-label-sm text-label-sm text-on-surface font-semibold"
+                          htmlFor="contact-subject"
                         >
                           Subject / Opportunity Type
                         </label>
                         <select
-                          className="w-full bg-surface-container-lowest text-on-surface px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary transition-all font-body-sm text-body-sm shadow-inner"
-                          id="opportunity-type"
-                          value={opportunityType}
-                          onChange={(e) => setOpportunityType(e.target.value)}
+                          className="w-full px-space-md py-2.5 rounded-lg bg-surface-container-lowest text-on-surface font-body-sm text-body-sm outline-none focus:ring-2 focus:ring-primary-container shadow-sm transition-all"
+                          id="contact-subject"
+                          value={contactSubject}
+                          onChange={(e) => setContactSubject(e.target.value)}
                         >
-                          <option className="bg-surface-container" value="internship">
-                            Internship / Junior Role
-                          </option>
-                          <option className="bg-surface-container" value="project">
-                            Freelance Web / UI Project
-                          </option>
-                          <option className="bg-surface-container" value="collaboration">
-                            Academic &amp; Student Collaboration
-                          </option>
-                          <option className="bg-surface-container" value="other">
-                            General Inquiry
-                          </option>
+                          <option value="internship">Internship Opportunity</option>
+                          <option value="project">Web Development Project</option>
+                          <option value="collaboration">Collaborative Venture</option>
+                          <option value="general">General Inquiry</option>
                         </select>
                       </div>
 
-                      <div className="space-y-2">
+                      <div className="flex flex-col gap-1.5">
                         <label
-                          className="font-label-md text-label-md text-on-surface-variant font-medium"
-                          htmlFor="message-content"
+                          className="font-label-sm text-label-sm text-on-surface font-semibold"
+                          htmlFor="contact-message"
                         >
                           Message
                         </label>
                         <textarea
-                          className="w-full bg-surface-container-lowest text-on-surface placeholder:text-outline px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary transition-all font-body-sm text-body-sm resize-none shadow-inner"
-                          id="message-content"
-                          value={messageContent}
-                          onChange={(e) => setMessageContent(e.target.value)}
-                          placeholder="Tell me about your team, the scope of the project, or how we might work together..."
+                          className="w-full px-space-md py-2.5 rounded-lg bg-surface-container-lowest text-on-surface font-body-sm text-body-sm outline-none focus:ring-2 focus:ring-primary-container shadow-sm transition-all"
+                          id="contact-message"
+                          value={contactMessage}
+                          onChange={(e) => {
+                            setContactMessage(e.target.value);
+                            if (submitState === "sent") setSubmitState("idle");
+                          }}
+                          placeholder="Tell me about your team, project requirements, or idea..."
                           required
-                          rows={5}
+                          rows={4}
                         />
                       </div>
 
                       <button
-                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-3.5 rounded-xl bg-primary-container text-on-primary-container font-label-md text-label-md font-semibold tracking-wide shadow-[0_0_24px_rgba(37,99,235,0.4)] hover:bg-inverse-primary hover:shadow-[0_0_32px_rgba(123,208,255,0.5)] transition-all duration-200 cursor-pointer"
+                        disabled={submitState === "sending"}
+                        className={`w-full py-3 px-space-lg rounded-lg text-on-primary font-label-md text-label-md font-bold shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                          submitState === "sent"
+                            ? "bg-tertiary-container hover:bg-tertiary"
+                            : "bg-primary-container hover:bg-primary"
+                        }`}
                         type="submit"
                       >
-                        <span>Send Message</span>
-                        <span className="material-symbols-outlined text-[18px]">send</span>
+                        {submitState === "sending" && (
+                          <>
+                            <span className="material-symbols-outlined text-[18px] animate-spin">
+                              refresh
+                            </span>
+                            <span>Sending...</span>
+                          </>
+                        )}
+                        {submitState === "sent" && (
+                          <>
+                            <span className="material-symbols-outlined text-[18px]">done</span>
+                            <span>Sent Successfully</span>
+                          </>
+                        )}
+                        {submitState === "idle" && (
+                          <>
+                            <span className="material-symbols-outlined text-[18px]">send</span>
+                            <span>Send Message</span>
+                          </>
+                        )}
                       </button>
 
-                      {submittedInfo && (
-                        <div className="p-4 rounded-xl bg-surface-container-high text-secondary flex items-start justify-between gap-3">
-                          <div className="flex items-start gap-3">
-                            <span className="material-symbols-outlined text-[20px] mt-0.5">
-                              check_circle
-                            </span>
-                            <span className="font-body-sm text-body-sm">
-                              Thank you, <strong>{submittedInfo.name}</strong>! Your message has
-                              been prepared. I will respond to{" "}
-                              <span className="underline">{submittedInfo.email}</span> as soon as
-                              possible.
-                            </span>
-                          </div>
-                          <button
-                            type="button"
-                            aria-label="Dismiss confirmation"
-                            onClick={() => setSubmittedInfo(null)}
-                            className="text-outline hover:text-on-surface cursor-pointer"
-                          >
-                            <span className="material-symbols-outlined text-[18px]">close</span>
-                          </button>
+                      {submitState === "sent" && (
+                        <div className="p-space-md rounded-lg bg-secondary-fixed text-on-secondary-fixed flex items-center gap-space-xs font-body-sm text-body-sm">
+                          <span className="material-symbols-outlined text-[20px] text-secondary">
+                            check_circle
+                          </span>
+                          <span>Thank you! Your message has been noted. I will reach out soon.</span>
                         </div>
                       )}
                     </form>
@@ -1474,12 +1322,7 @@ export default function App() {
         )}
       </main>
 
-      <Footer
-        activeScreen={activeScreen}
-        activeSection={activeSection}
-        onNavigateSection={navigateToSection}
-        onOpenResume={openResume}
-      />
+      <Footer activeScreen={activeScreen} onNavigate={navigateScreen} />
     </div>
   );
 }

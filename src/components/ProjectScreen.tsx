@@ -23,24 +23,38 @@ export const ProjectScreen: React.FC<ProjectScreenProps> = ({
 }) => {
   const project = PROJECTS.find((p) => p.id === projectId) || PROJECTS[0];
 
-  return (
-    <div className="relative w-full overflow-hidden pb-20">
-      {/* Top Ambient Glow matching Home Screen */}
-      <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[650px] h-[300px] bg-primary-container/20 rounded-full blur-[130px] pointer-events-none" />
+  const toneBadgeClass =
+    project.accentTone === "primary"
+      ? "bg-primary-fixed text-primary"
+      : project.accentTone === "secondary"
+      ? "bg-secondary-fixed text-secondary"
+      : "bg-tertiary-fixed text-tertiary";
 
-      <div className="relative max-w-7xl mx-auto px-6 lg:px-12 pt-10 lg:pt-14 space-y-10">
-        {/* Top Breadcrumb & Project Switcher */}
+  const toneMetricClass =
+    project.accentTone === "primary"
+      ? "text-primary"
+      : project.accentTone === "secondary"
+      ? "text-secondary"
+      : "text-tertiary";
+
+  return (
+    <div className="relative w-full overflow-hidden pb-space-xl">
+      {/* Subtle Top Ambient Glow */}
+      <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[720px] h-[320px] bg-gradient-to-b from-primary-fixed/40 via-surface-container/20 to-transparent blur-3xl pointer-events-none -z-10" />
+
+      <div className="max-w-7xl mx-auto px-margin-mobile lg:px-margin-desktop pt-8 lg:pt-12 space-y-8">
+        {/* Top Bar: Back + Project Switcher */}
         <div className="flex flex-wrap items-center justify-between gap-4">
           <button
             type="button"
             onClick={onBackToPortfolio}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md transition-colors cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md transition-colors cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+            <span className="material-symbols-outlined text-[18px] text-primary">arrow_back</span>
             <span>Back to Portfolio</span>
           </button>
 
-          <div className="flex flex-wrap items-center gap-2 bg-surface-container-lowest p-1.5 rounded-xl">
+          <div className="flex flex-wrap items-center gap-1.5 bg-surface-container-low p-1.5 rounded-xl">
             {PROJECTS.map((item) => (
               <button
                 key={item.id}
@@ -48,7 +62,7 @@ export const ProjectScreen: React.FC<ProjectScreenProps> = ({
                 onClick={() => onSelectProject(item.id, activeTab)}
                 className={`px-3.5 py-1.5 rounded-lg font-label-sm text-label-sm transition-colors cursor-pointer whitespace-nowrap ${
                   item.id === project.id
-                    ? "bg-surface-container-highest text-primary font-semibold"
+                    ? "bg-surface-container-lowest text-primary font-bold shadow-sm"
                     : "text-on-surface-variant hover:text-on-surface"
                 }`}
               >
@@ -58,28 +72,34 @@ export const ProjectScreen: React.FC<ProjectScreenProps> = ({
           </div>
         </div>
 
-        {/* Project Hero Header */}
-        <div className="bg-surface-container-low rounded-3xl p-8 lg:p-12 shadow-xl space-y-6">
+        {/* Project Hero Summary Card */}
+        <div className="bg-surface-container-low rounded-2xl p-space-lg lg:p-space-xl shadow-sm space-y-5">
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="inline-flex items-center gap-2 font-label-md text-label-md text-secondary">
-              <span className="material-symbols-outlined text-[18px]">{project.suiteIcon}</span>
-              <span>{project.suiteLabel}</span>
-              <span aria-hidden="true">·</span>
-              <span className="text-on-surface-variant">{project.timeline}</span>
+            <div className="flex flex-wrap items-center gap-3">
+              <span
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded font-mono text-[11px] font-bold ${toneBadgeClass}`}
+              >
+                <span className="material-symbols-outlined text-[15px]">{project.suiteIcon}</span>
+                <span>{project.suiteLabel}</span>
+              </span>
+              <span className="font-label-sm text-label-sm text-on-surface-variant">
+                {project.timeline}
+              </span>
             </div>
+
             <a
               href={project.githubUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 font-label-md text-label-md text-on-surface-variant hover:text-secondary transition-colors"
+              className="inline-flex items-center gap-1.5 font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors"
             >
               <span className="material-symbols-outlined text-[18px]">code</span>
-              <span>Repository Reference</span>
+              <span>GitHub Repository</span>
             </a>
           </div>
 
-          <div className="max-w-3xl space-y-4">
-            <h1 className="font-display-mobile lg:text-display text-on-surface font-bold tracking-tight">
+          <div className="max-w-3xl space-y-3">
+            <h1 className="font-headline-xl-mobile lg:text-headline-xl text-on-surface tracking-tight">
               {project.title}
             </h1>
             <p className="font-body-lg text-body-lg text-on-surface-variant leading-relaxed">
@@ -87,42 +107,44 @@ export const ProjectScreen: React.FC<ProjectScreenProps> = ({
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-6 pt-4 border-t border-outline-variant/20">
-            <div className="flex flex-wrap items-center gap-3 font-code-inline text-xs text-secondary">
-              {project.tags.map((tag, idx) => (
-                <React.Fragment key={tag}>
-                  {idx > 0 && (
-                    <span className="text-outline" aria-hidden="true">
-                      ·
-                    </span>
-                  )}
-                  <span>{tag}</span>
-                </React.Fragment>
+          <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-outline-variant/40">
+            <div className="flex flex-wrap gap-1.5">
+              {project.tags.map((tag) => (
+                <span
+                  key={tag.label}
+                  className={`px-2.5 py-1 rounded font-label-sm text-label-sm ${
+                    tag.emphasized
+                      ? `${toneBadgeClass} font-semibold`
+                      : "bg-surface-container-lowest text-on-surface font-medium"
+                  }`}
+                >
+                  {tag.label}
+                </span>
               ))}
             </div>
-            <div className="font-label-sm text-label-sm text-outline">
-              Role: <span className="text-on-surface">{project.role}</span>
+            <div className="font-label-sm text-label-sm text-on-surface-variant">
+              Role: <span className="text-on-surface font-semibold">{project.role}</span>
             </div>
           </div>
         </div>
 
-        {/* Mode Switch Tabs: Case Study | Interactive Demo | Architecture */}
-        <div className="flex flex-wrap items-center gap-2 bg-surface-container-lowest p-1.5 rounded-2xl w-fit">
+        {/* Interactive Mode Switcher */}
+        <div className="flex flex-wrap items-center gap-2 bg-surface-container-low p-1.5 rounded-xl w-fit">
           {(
             [
-              { id: "case-study", label: "Case Study Overview", icon: "menu_book" },
+              { id: "case-study", label: "Case Study", icon: "folder_special" },
               { id: "demo", label: "Interactive Live Demo", icon: "play_circle" },
-              { id: "architecture", label: "Architecture & Code", icon: "terminal" },
+              { id: "architecture", label: "Code & Architecture", icon: "terminal" },
             ] as { id: ProjectTab; label: string; icon: string }[]
           ).map((tab) => (
             <button
               key={tab.id}
               type="button"
               onClick={() => onChangeTab(tab.id)}
-              className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-label-md text-label-md transition-all cursor-pointer whitespace-nowrap ${
+              className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-label-md text-label-md transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === tab.id
-                  ? "bg-primary-container text-on-primary-container shadow-[0_0_16px_rgba(37,99,235,0.35)]"
-                  : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container"
+                  ? "bg-primary-container text-on-primary shadow-sm"
+                  : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container-lowest"
               }`}
             >
               <span className="material-symbols-outlined text-[18px]">{tab.icon}</span>
@@ -133,18 +155,19 @@ export const ProjectScreen: React.FC<ProjectScreenProps> = ({
 
         {/* Tab 1: Case Study */}
         {activeTab === "case-study" && (
-          <div className="space-y-10">
-            {/* Impact Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
               {project.impactMetrics.map((metric) => (
                 <div
                   key={metric.label}
-                  className="bg-surface-container rounded-2xl p-6 shadow-md space-y-2"
+                  className="bg-surface-container-low rounded-xl p-space-lg space-y-1.5"
                 >
-                  <span className="font-label-sm text-label-sm text-outline uppercase">
+                  <span className="font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">
                     {metric.label}
                   </span>
-                  <div className="font-headline-lg text-headline-lg text-secondary font-bold tabular-nums">
+                  <div
+                    className={`font-headline-lg text-headline-lg font-bold tabular-nums ${toneMetricClass}`}
+                  >
                     {metric.value}
                   </div>
                   <p className="font-body-sm text-body-sm text-on-surface-variant">
@@ -154,28 +177,31 @@ export const ProjectScreen: React.FC<ProjectScreenProps> = ({
               ))}
             </div>
 
-            {/* Problem & Solution Split */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-surface-container rounded-2xl p-8 space-y-3">
-                <div className="inline-flex items-center gap-2 text-tertiary font-label-md text-label-md">
-                  <span className="material-symbols-outlined text-[20px]">help_clinic</span>
-                  <span>The Problem</span>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-gutter">
+              <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-outline-variant/30 space-y-3">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container font-label-sm text-label-sm text-on-surface font-semibold">
+                  <span className="material-symbols-outlined text-[16px] text-primary">
+                    psychology_alt
+                  </span>
+                  <span>Operational Challenge</span>
                 </div>
-                <h2 className="font-headline-md text-headline-md text-on-surface font-semibold">
-                  User Friction &amp; Context
+                <h2 className="font-headline-md text-headline-md text-on-surface">
+                  The Problem Space
                 </h2>
                 <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
                   {project.problem}
                 </p>
               </div>
 
-              <div className="bg-surface-container rounded-2xl p-8 space-y-3">
-                <div className="inline-flex items-center gap-2 text-secondary font-label-md text-label-md">
-                  <span className="material-symbols-outlined text-[20px]">verified</span>
-                  <span>The Solution</span>
+              <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-outline-variant/30 space-y-3">
+                <div
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded font-label-sm text-label-sm font-semibold ${toneBadgeClass}`}
+                >
+                  <span className="material-symbols-outlined text-[16px]">verified</span>
+                  <span>Strategic &amp; Technical Solution</span>
                 </div>
-                <h2 className="font-headline-md text-headline-md text-on-surface font-semibold">
-                  Engineering &amp; UX Execution
+                <h2 className="font-headline-md text-headline-md text-on-surface">
+                  Product Execution
                 </h2>
                 <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
                   {project.solution}
@@ -183,16 +209,15 @@ export const ProjectScreen: React.FC<ProjectScreenProps> = ({
               </div>
             </div>
 
-            {/* Design Decisions + Prompt to launch Live Demo */}
-            <div className="bg-surface-container-low rounded-3xl p-8 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+            <div className="bg-surface-container-low rounded-2xl p-space-lg lg:p-space-xl flex flex-col lg:flex-row lg:items-center justify-between gap-6">
               <div className="space-y-4 max-w-2xl">
-                <h3 className="font-headline-md text-headline-md text-on-surface font-semibold">
-                  Key UI/UX Decisions
+                <h3 className="font-headline-md text-headline-md text-on-surface">
+                  Design &amp; Workflow Decisions
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   {project.designDecisions.map((item) => (
-                    <div key={item.title} className="space-y-1.5">
-                      <div className="font-body-md text-body-md text-primary font-semibold">
+                    <div key={item.title} className="space-y-1">
+                      <div className="font-label-md text-label-md text-primary font-bold">
                         {item.title}
                       </div>
                       <p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
@@ -206,34 +231,34 @@ export const ProjectScreen: React.FC<ProjectScreenProps> = ({
               <button
                 type="button"
                 onClick={() => onChangeTab("demo")}
-                className="shrink-0 inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl bg-primary-container hover:bg-inverse-primary text-on-primary-container font-label-md text-label-md font-semibold shadow-[0_0_24px_rgba(37,99,235,0.4)] transition-all cursor-pointer"
+                className="shrink-0 inline-flex items-center justify-center gap-2 px-space-lg py-3 rounded-lg bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md shadow-md transition-all cursor-pointer"
               >
-                <span className="material-symbols-outlined text-[20px]">rocket_launch</span>
-                <span>Try Interactive Demo</span>
+                <span className="material-symbols-outlined text-[18px]">rocket_launch</span>
+                <span>Launch Interactive Demo</span>
               </button>
             </div>
           </div>
         )}
 
-        {/* Tab 2: Interactive Live Demo */}
+        {/* Tab 2: Live Interactive Demo */}
         {activeTab === "demo" && (
-          <div className="space-y-8">
+          <div>
             {project.id === "productivity" && <ProductivityDemo />}
             {project.id === "finance" && <FinanceDemo />}
             {project.id === "marketplace" && <MarketplaceDemo />}
           </div>
         )}
 
-        {/* Tab 3: Architecture & Code */}
+        {/* Tab 3: Architecture & Code (styled like Hero's bg-inverse-surface card) */}
         {activeTab === "architecture" && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-gutter">
             {project.architectureHighlights.map((block) => (
               <div
                 key={block.title}
-                className="bg-surface-container rounded-2xl p-6 shadow-lg flex flex-col justify-between space-y-5"
+                className="bg-surface-container-low rounded-2xl p-space-lg flex flex-col justify-between space-y-5"
               >
                 <div className="space-y-2">
-                  <h3 className="font-headline-sm text-headline-sm text-on-surface font-semibold">
+                  <h3 className="font-headline-sm text-headline-sm text-on-surface font-bold">
                     {block.title}
                   </h3>
                   <p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
@@ -241,12 +266,18 @@ export const ProjectScreen: React.FC<ProjectScreenProps> = ({
                   </p>
                 </div>
 
-                <div className="bg-surface-container-lowest rounded-xl p-4 font-code-inline text-xs text-on-surface overflow-x-auto">
-                  <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-outline-variant/20 text-outline">
-                    <span>implementation.ts</span>
-                    <span className="material-symbols-outlined text-[15px]">terminal</span>
+                <div className="bg-inverse-surface rounded-xl p-4 text-inverse-on-surface shadow-md">
+                  <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-outline-variant/20">
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-2.5 h-2.5 rounded-full bg-error" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-secondary-container" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-tertiary-fixed" />
+                    </div>
+                    <span className="font-label-sm text-label-sm text-outline-variant font-mono">
+                      module.config.ts
+                    </span>
                   </div>
-                  <pre className="leading-relaxed text-secondary whitespace-pre-wrap">
+                  <pre className="font-code-inline text-code-inline leading-relaxed font-mono text-secondary-fixed whitespace-pre-wrap overflow-x-auto">
                     {block.codeSnippet}
                   </pre>
                 </div>
@@ -255,23 +286,22 @@ export const ProjectScreen: React.FC<ProjectScreenProps> = ({
           </div>
         )}
 
-        {/* Bottom Collaboration CTA */}
-        <div className="bg-surface-container rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        {/* Collaboration Callout */}
+        <div className="bg-surface-container-low rounded-2xl p-space-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h3 className="font-headline-sm text-headline-sm text-on-surface font-semibold">
-              Interested in how I built {project.title}?
+            <h3 className="font-headline-sm text-headline-sm text-on-surface font-bold">
+              Want to discuss {project.title} or collaborate on a build?
             </h3>
-            <p className="font-body-sm text-body-sm text-on-surface-variant mt-1">
-              Let&apos;s discuss engineering internships, frontend architecture, or collaborative
-              builds.
+            <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+              Reach out for internships, software projects, or product engineering conversations.
             </p>
           </div>
           <button
             type="button"
             onClick={onContactForProject}
-            className="px-6 py-3 rounded-xl bg-primary-container hover:bg-inverse-primary text-on-primary-container font-label-md text-label-md font-semibold transition-colors cursor-pointer whitespace-nowrap"
+            className="px-space-lg py-3 rounded-lg bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md shadow-sm transition-colors cursor-pointer whitespace-nowrap"
           >
-            Start a Conversation
+            Let&apos;s Talk
           </button>
         </div>
       </div>

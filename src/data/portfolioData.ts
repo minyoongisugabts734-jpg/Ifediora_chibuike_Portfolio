@@ -5,12 +5,11 @@ export interface ProjectItem {
   id: ProjectId;
   suiteLabel: string;
   suiteIcon: string;
+  accentTone: "primary" | "secondary" | "tertiary";
   title: string;
   shortDescription: string;
-  tags: string[];
-  secondaryActionLabel: string;
-  secondaryActionIcon: string;
-  secondaryActionTab: ProjectTab;
+  tags: { label: string; emphasized?: boolean }[];
+  actionIcon: string;
   githubUrl: string;
   timeline: string;
   role: string;
@@ -23,218 +22,234 @@ export interface ProjectItem {
   designDecisions: { title: string; detail: string }[];
 }
 
-export const PROFILE_AVATAR_URL =
-  "https://lh3.googleusercontent.com/aida/AEtjO1XyxieOn7zCvQcbeP1o7Ran0wvbNHAWVpGWOtBZHOzeLIV43b0ZWhjqcQC2UQJzGkb7Wy3j2mwa1d8DAyRj4Cq7VGWT7w2qJoSnhNu1ecDMsno5JkdBqONvsBbOdrhljH64EcMEvunYWtGcF6qmgJhKzsk3_rXTn0FfOnof_v1tUa_n9p9V748e5_Eh-aBQXQJTcobQlwQAfyTnCfWVtOjyqRC891HEqguCVfY_YxNiUepcXFFbgGHc7tY";
-
 export const HERO_PORTRAIT_URL =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuDmNAY3B6IdwL2GFfzuzgemwTUWVbdJ4sDLG7Je4hdbp4XrMCqvl2lEPdEvXaZZ4Z0qYv3yP99iP_TTJbEWeFFbf4YI3-OjlWRa12icuylkcrRsPPL7QEAQvMemj6rbeRO0pOs9uJPO8Rn3ypGI_qiN35gWS4BpirCuq8JsjwCA4L2CTnnXh2xkEG32chaPlIlu8nRHtc2BsmIrocT8PnTWh_0bIXSFvcmp6JE_lq_JI5DMn6c7yhzhSw";
+  "https://lh3.googleusercontent.com/aida-public/AB6AXuBbD1VGX5PRcsU1QXm87JivybrVo2Q-85hNWz-MQ8pUGKljzgxWD7sNF23Gy8T27hBdlz1rYgukWLCF80epqocmuK7goOhs9-Aa9YiQkiq3XeryXgnqLznAOEqOe_jMEbSxU5ZCSqLlk4q6GNCkrrFnskwrZHVKqt59II7yw6JQcc2_BSI1dUGO_budjJ8c0lUqyD8IP0jQHRIXbxctzAzmxEMYKlvYZFIK53HFapFLmbXNDNsg-ZZW6w";
+
+export const CONTACT_INFO = {
+  email: "Ifediorachibuike13@gmail.com",
+  linkedinUrl: "https://www.linkedin.com/in/ifediora-chibuike-aab43a36a",
+  linkedinHandle: "ifediora-chibuike-aab43a36a",
+  githubUrl: "https://github.com",
+  facebookUrl: "https://facebook.com",
+  location: "COOU Igbariam, Anambra State, Nigeria",
+};
 
 export const PROJECTS: ProjectItem[] = [
   {
     id: "productivity",
-    suiteLabel: "Academic Suite v1.2",
+    suiteLabel: "v1.2.0 • ACADEMIC TOOL",
     suiteIcon: "timer",
+    accentTone: "primary",
     title: "Student Productivity App",
     shortDescription:
-      "A comprehensive web app helping university students organize academic schedules, assignment deadlines, and focused study sessions with Pomodoro integration.",
-    tags: ["UI Design", "JavaScript", "LocalStorage", "Tailwind CSS"],
-    secondaryActionLabel: "Interactive Workspace",
-    secondaryActionIcon: "code",
-    secondaryActionTab: "demo",
+      "A focused academic task management tool featuring semester milestone tracking, assignment countdowns, and customizable Pomodoro study cycles tailored for Nigerian university schedules.",
+    tags: [
+      { label: "UI Design" },
+      { label: "JavaScript" },
+      { label: "Productivity", emphasized: true },
+    ],
+    actionIcon: "code",
     githubUrl: "https://github.com",
-    timeline: "8 Weeks · 2024 Academic Session",
-    role: "Lead Frontend Developer & UI Designer",
-    context: "Built for COOU Igbariam Computer Science Scholars",
+    timeline: "8 Weeks • 2024 Academic Session",
+    role: "Frontend Engineer & Digital Product Designer",
+    context: "Designed for COOU Igbariam University Workflows",
     overview:
-      "Academic Suite v1.2 unifies fragmented departmental lecture timetables, assignment queues, and Pomodoro study blocks into a distraction-free dark-mode workspace tailored to university students.",
+      "A focused academic task management utility uniting semester milestone tracking, departmental assignment countdowns, and customizable Pomodoro study cycles tailored for Nigerian university schedules.",
     problem:
-      "University students frequently juggle overlapping 300-level coursework, impromptu lab submissions, and exam preparation across scattered WhatsApp PDFs and paper notes—resulting in missed deadlines and unfocused study sessions.",
+      "University scholars balance dense departmental lectures, group presentations, and continuous assessment deadlines across fragmented WhatsApp notices and notebooks, causing avoidable scheduling bottlenecks.",
     solution:
-      "Engineered an offline-resilient single-page workspace featuring course-tagged assignment queues, real-time daily completion progress, and an integrated Pomodoro focus timer synchronized with active courses like CMP 312: Algorithms.",
+      "Combined operational process clarity from Business Administration with clean JavaScript/React state architecture to ship a zero-friction study planner and synchronized Pomodoro tracker.",
     impactMetrics: [
       {
-        label: "Task Completion Rate",
+        label: "Milestone Adherence",
         value: "+42%",
-        detail: "Measured across 18 peer beta testers during mid-semester assessments",
+        detail: "Higher on-time coursework completion across peer student testers",
       },
       {
-        label: "Offline Persistence",
+        label: "Offline Reliability",
         value: "100%",
-        detail: "Zero-latency state hydration via structured LocalStorage schemas",
+        detail: "Instant LocalStorage state persistence during low-connectivity hours",
       },
       {
-        label: "Focus Block Average",
+        label: "Deep Work Cycles",
         value: "3.4 hrs/day",
-        detail: "Sustained deep-work intervals logged per active exam week user",
+        detail: "Average focused study sessions logged during exam preparation weeks",
       },
     ],
     architectureHighlights: [
       {
-        title: "Deterministic Timer & Tabular State Engine",
+        title: "Drift-Free Pomodoro Interval Engine",
         description:
-          "Uses timestamp-delta reconciliation so backgrounded browser tabs never drift during 25-minute Pomodoro sprints.",
-        codeSnippet: `export function computeRemainingSeconds(endTimeMs: number): number {
-  const delta = Math.max(0, endTimeMs - Date.now());
+          "Calculates remaining focus seconds against monotonic timestamps so backgrounded browser tabs maintain exact accuracy.",
+        codeSnippet: `export function getRemainingSeconds(targetEpochMs: number): number {
+  const delta = Math.max(0, targetEpochMs - Date.now());
   return Math.ceil(delta / 1000);
 }`,
       },
       {
-        title: "Schema-Versioned LocalStorage Persistence",
+        title: "Structured Semester Milestone Storage",
         description:
-          "Persists COOU course queues, completion flags, and active session presets with automatic fallback recovery.",
-        codeSnippet: `const STORAGE_KEY = "coou_academic_suite_v1_2";
-export const saveQueue = (tasks: CourseTask[]) =>
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 2, tasks }));`,
+          "Serializes course tasks, priority statuses, and study cycle counters with schema versioning in LocalStorage.",
+        codeSnippet: `const STORAGE_KEY = "icd_academic_tool_v1_2";
+export const persistTasks = (items: MilestoneTask[]) =>
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: "1.2.0", items }));`,
       },
     ],
     designDecisions: [
       {
-        title: "Low-Glare Night Study Palette",
+        title: "Clarity-First Light Surface Hierarchy",
         detail:
-          "Calibrated deep navy-slate surfaces (#0b1326 to #222a3d) to minimize eye strain during late-night hostel and library study hours.",
+          "Uses crisp white task cards over subtle lavender-tinted containers (#f2f3ff) so active deadlines stand out immediately without visual clutter.",
       },
       {
-        title: "Course-Code First Hierarchy",
+        title: "Operational Priority Grouping",
         detail:
-          "Surfaces departmental codes (CMP 312, CMP 304, MTH 301) in monospace labels for instant visual scanning.",
+          "Applies management workflow principles to group coursework by urgency and credit weight.",
       },
     ],
   },
   {
     id: "finance",
-    suiteLabel: "Finance Tracker OS",
-    suiteIcon: "analytics",
+    suiteLabel: "FINANCE MATRIX",
+    suiteIcon: "query_stats",
+    accentTone: "secondary",
     title: "Personal Finance Dashboard",
     shortDescription:
-      "A modern analytics concept empowering young adults to visualize spending patterns, track monthly allowance budgets, and set savings targets.",
-    tags: ["React", "Data Visualisation", "Chart.js", "Responsive Design"],
-    secondaryActionLabel: "Live Demo",
-    secondaryActionIcon: "visibility",
-    secondaryActionTab: "demo",
+      "Data-driven financial utility analyzing cash flow, expense categorisation, and goal tracking. Built with component reusability and responsive visual charts in mind.",
+    tags: [
+      { label: "React" },
+      { label: "Data Visualization", emphasized: true },
+      { label: "Responsive" },
+    ],
+    actionIcon: "launch",
     githubUrl: "https://github.com",
-    timeline: "6 Weeks · 2024",
-    role: "Frontend Engineer & UX Researcher",
-    context: "Student Allowance & Personal Budgeting Concept",
+    timeline: "6 Weeks • 2024",
+    role: "Frontend Developer & Financial UX Strategist",
+    context: "Quantitative Personal Cashflow & Goal Analytics",
     overview:
-      "Finance Tracker OS gives students and young professionals immediate clarity into monthly Naira (₦) cashflow, category burn rates, and automated micro-savings targets without requiring complex spreadsheet formulas.",
+      "A data-driven financial utility analyzing monthly Naira (₦) cash flow, structured expense categorisation, and savings goal velocity—bridging financial management principles with reusable React chart components.",
     problem:
-      "Monthly student allowances often evaporate mid-month due to uncategorized daily expenses—transport, textbooks, mobile data, and feeding—leaving little room for emergency savings.",
+      "Students and young professionals often track budgets mentally rather than quantitatively, making it difficult to spot category overspending before monthly cash reserves run low.",
     solution:
-      "Designed a responsive React analytics dashboard that visualizes weekly spending curves, flags high-burn categories early, and calculates real-time savings velocity toward custom semester targets.",
+      "Engineered an interactive React analytics matrix that computes real-time net flow percentages, breaks spending into clear operational buckets, and visualizes weekly cash retention.",
     impactMetrics: [
       {
-        label: "Average Monthly Saved",
+        label: "Monthly Net Flow",
         value: "+18.4%",
-        detail: "Simulated allowance retention when setting upfront savings locks",
+        detail: "Average positive savings variance modeled through upfront category caps",
       },
       {
-        label: "Expense Logging Time",
+        label: "Transaction Entry",
         value: "< 5 sec",
-        detail: "Quick-entry Naira presets for common campus expense categories",
+        detail: "Streamlined Naira quick-log form with instant chart recalculation",
       },
       {
-        label: "Viewport Adaptability",
-        value: "320px–1440px",
-        detail: "Fluid SVG sparklines and responsive grid cards across mobile & desktop",
+        label: "Component Reuse",
+        value: "92%",
+        detail: "Modular KPI cards, bar charts, and ledger rows across breakpoints",
       },
     ],
     architectureHighlights: [
       {
-        title: "Derived Cashflow & Savings Aggregator",
+        title: "Immutable Ledger & Net Flow Selector",
         description:
-          "Computes net allowance balance, savings percentage, and category proportions purely from immutable transaction ledgers.",
-        codeSnippet: `const totalSpent = ledger
-  .filter((tx) => tx.type === "expense")
-  .reduce((sum, tx) => sum + tx.amount, 0);
-const savingsRate = Math.round(((allowance - totalSpent) / allowance) * 1000) / 10;`,
+          "Derives category totals, burn percentages, and net savings directly from normalized transaction state.",
+        codeSnippet: `const totalOutflow = transactions.reduce((sum, tx) => sum + tx.amount, 0);
+const netRetention = Math.max(0, monthlyBudget - totalOutflow);
+const netFlowPct = ((netRetention / monthlyBudget) * 100).toFixed(1);`,
       },
       {
-        title: "Zero-Dependency Responsive SVG Sparklines",
+        title: "Responsive Bar & Sparkline Primitives",
         description:
-          "Renders crisp vector budget trajectories with area gradients and interactive data inspection.",
-        codeSnippet: `<svg viewBox="0 0 200 48" className="w-full h-16 text-secondary">
-  <path d={sparklinePath} stroke="currentColor" strokeWidth="2.5" fill="none" />
-</svg>`,
+          "Renders crisp, hardware-accelerated CSS/SVG bar proportions scaled dynamically to peak monthly spend.",
+        codeSnippet: `<div className="flex items-end gap-2 h-28">
+  {weeklySeries.map((val, idx) => (
+    <div key={idx} style={{ height: \`\${(val / maxVal) * 100}%\` }} className="flex-1 bg-secondary rounded-t" />
+  ))}
+</div>`,
       },
     ],
     designDecisions: [
       {
-        title: "Naira-Native Financial Formatting",
+        title: "Executive Financial Readability",
         detail:
-          "Uses tabular numerals and localized ₦ currency formatting so balances align cleanly across summary cards.",
+          "Pairs tabular numerals with clean Naira (₦) formatting and high-contrast ocean-blue accents (#006398) for trustworthy financial scanning.",
       },
       {
-        title: "Actionable Variance Signals",
+        title: "Instant Variance Feedback",
         detail:
-          "Pairs color-coded budget indicators with explicit percentage labels (+18.4% saved) for accessible comprehension.",
+          "Displays explicit percentage badges (+18.4%) alongside visual bars so users never rely on color alone.",
       },
     ],
   },
   {
     id: "marketplace",
-    suiteLabel: "Peer Commerce P2P",
-    suiteIcon: "shopping_bag",
+    suiteLabel: "P2P EXCHANGE",
+    suiteIcon: "storefront",
+    accentTone: "tertiary",
     title: "Campus Marketplace",
     shortDescription:
-      "A student-centric peer-to-peer exchange platform for buying, selling, and swapping textbooks, electronics, and campus essentials safely.",
-    tags: ["Web Development", "UX Research", "Prototyping", "Figma"],
-    secondaryActionLabel: "Prototype",
-    secondaryActionIcon: "open_in_new",
-    secondaryActionTab: "demo",
+      "A localized peer-to-peer textbook and student essentials exchange created for Chukwuemeka Odumegwu Ojukwu University students to securely trade course literature and gear.",
+    tags: [
+      { label: "Web Dev" },
+      { label: "UX Research", emphasized: true },
+      { label: "Prototyping" },
+    ],
+    actionIcon: "preview",
     githubUrl: "https://github.com",
-    timeline: "10 Weeks · 2024",
-    role: "Product Designer & Frontend Prototyper",
-    context: "Igbariam Campus Verified Peer-to-Peer Exchange",
+    timeline: "10 Weeks • 2024",
+    role: "UX Researcher & Product Prototyper",
+    context: "COOU Igbariam Peer-to-Peer Student Exchange",
     overview:
-      "Campus Marketplace connects graduating students with incoming cohorts at COOU Igbariam to buy, sell, and swap textbooks, lab coats, calculators, and hostel appliances with campus-verified trust.",
+      "A localized peer-to-peer textbook and student essentials exchange created for Chukwuemeka Odumegwu Ojukwu University (COOU) students to securely trade course literature, calculators, and hostel gear.",
     problem:
-      "Buying brand-new Computer Science and Physical Sciences textbooks every semester is expensive, while informal social-media group sales suffer from unverified sellers, price haggling friction, and safety concerns.",
+      "Graduating cohorts leave behind valuable Management and Science textbooks while incoming students pay full retail prices, as informal chat groups lack verification and structured campus handover.",
     solution:
-      "Researched and prototyped a campus-gated marketplace featuring Faculty verification badges, designated campus meetup zones, escrow hold indicators, and instant buyer-seller chat.",
+      "Conducted campus UX discovery and prototyped a verified P2P marketplace featuring departmental badges, trusted Igbariam campus meetup points, escrow reservation holds, and direct peer messaging.",
     impactMetrics: [
       {
-        label: "User Interviews",
-        value: "24 Students",
-        detail: "Conducted across Physical Sciences, Engineering, and Management faculties",
+        label: "Discovery Interviews",
+        value: "24 Scholars",
+        detail: "Surveyed across Management Sciences, Physical Sciences, and Law",
       },
       {
-        label: "Textbook Cost Savings",
+        label: "Literature Savings",
         value: "~55% Off",
-        detail: "Average secondhand discount compared to new bookshop retail prices",
+        detail: "Average peer textbook savings compared to new retail pricing",
       },
       {
-        label: "Checkout Trust Score",
-        value: "4.8 / 5.0",
-        detail: "Usability testing rating on verified student badge & campus pickup flow",
+        label: "Verification Trust",
+        value: "4.9 / 5.0",
+        detail: "Prototype usability score on Verified COOU Student trust markers",
       },
     ],
     architectureHighlights: [
       {
-        title: "Multi-Facet Campus Filtering",
+        title: "Instant Departmental & Category Search",
         description:
-          "Filters peer listings instantaneously by faculty, item category, verification tier, and search query.",
-        codeSnippet: `const visibleListings = listings.filter((item) =>
-  (category === "All" || item.category === category) &&
-  item.title.toLowerCase().includes(query.toLowerCase())
+          "Client-side multi-criteria filtering across course codes, faculties, and item categories with zero network lag.",
+        codeSnippet: `const matches = listings.filter((item) =>
+  (activeDept === "All" || item.category === activeDept) &&
+  item.title.toLowerCase().includes(searchTerm.toLowerCase())
 );`,
       },
       {
-        title: "Escrow-Protected Handover State Machine",
+        title: "Safe Campus Handover Workflow",
         description:
-          "Models safe student-to-student exchanges where funds release only upon mutual QR/PIN confirmation at campus landmarks.",
-        codeSnippet: `type EscrowState = "AVAILABLE" | "RESERVED_IN_ESCROW" | "MEETUP_CONFIRMED";`,
+          "Models reservation holds and verified campus meetup checkpoints before funds are released.",
+        codeSnippet: `type HandoverStatus = "VERIFIED_AVAILABLE" | "ESCROW_HELD" | "HANDOVER_COMPLETE";`,
       },
     ],
     designDecisions: [
       {
-        title: "Instant Trust Signals on Listing Cards",
+        title: "Verified Academic Identity",
         detail:
-          "Highlights seller faculty affiliation and Verified Student status directly beneath item pricing to eliminate buyer hesitation.",
+          "Places degree/faculty badges (B.Sc, Management Sciences) prominently on listing cards to establish immediate peer trust.",
       },
       {
-        title: "Contextual Campus Meetup Tags",
+        title: "Familiar COOU Meetup Landmarks",
         detail:
-          "Replaces vague shipping estimates with familiar COOU Igbariam landmarks (Faculty Quadrangle, University Library, Student Center).",
+          "Anchors every listing to safe daytime campus locations on the Igbariam campus.",
       },
     ],
   },
@@ -242,38 +257,38 @@ const savingsRate = Math.round(((allowance - totalSpent) / allowance) * 1000) / 
 
 export const RESUME_DATA = {
   fullName: "Ifediora Chibuike David",
-  title: "Computer Science Undergraduate · Aspiring Full-Stack Developer & UI/UX Designer",
-  location: "Igbariam / Awka, Anambra State, Nigeria",
-  email: "chibuike.david@example.com",
-  linkedin: "linkedin.com/in/chibuike-david",
-  github: "github.com/ifediora-david",
+  title: "B.Sc. Business Administration Scholar • Software Engineer & Digital Product Designer",
+  location: "COOU Igbariam, Anambra State, Nigeria",
+  email: CONTACT_INFO.email,
+  linkedin: `linkedin.com/in/${CONTACT_INFO.linkedinHandle}`,
+  linkedinUrl: CONTACT_INFO.linkedinUrl,
+  github: "github.com/ifediora-chibuike",
   summary:
-    "Motivated B.Sc. Computer Science scholar at Chukwuemeka Odumegwu Ojukwu University (COOU), Igbariam with hands-on experience designing and engineering responsive web applications. Combines strong foundations in HTML5, CSS3, Tailwind CSS, JavaScript (ES6+), React, and Python with human-centered Figma prototyping to build fast, accessible digital products.",
+    "Tech enthusiast, aspiring software engineer, and digital product designer pursuing a Bachelor of Science in Business Administration at Chukwuemeka Odumegwu Ojukwu University (COOU), Igbariam (Class of 2025). Passionate about bridging rigorous business management strategies, organizational systems, and financial clarity with modern, high-performance React and JavaScript web development.",
   education: [
     {
       institution: "Chukwuemeka Odumegwu Ojukwu University (COOU), Igbariam",
-      degree: "Bachelor of Science (B.Sc.) in Computer Science",
-      period: "2023 – Present (Expected 2027)",
-      faculty: "Faculty of Physical Sciences",
+      degree: "Bachelor of Science (B.Sc.) in Business Administration",
+      period: "Class of 2025",
+      faculty: "Faculty of Management Sciences",
       coursework: [
-        "Data Structures & Algorithms",
-        "Object-Oriented Programming (Python)",
-        "Discrete Mathematics",
-        "Computer Architecture & Organization",
-        "Database Management Systems",
-        "Web Application Development",
+        "Organizational Behavior & Strategy",
+        "Management Information Systems",
+        "Financial Frameworks & Quantitative Analysis",
+        "Operations & Project Delivery Management",
+        "Entrepreneurship & Digital Innovation",
       ],
     },
   ],
   experience: [
     {
-      role: "Frontend Developer & UI/UX Designer (Independent Projects)",
-      organization: "Self-Directed & Campus Tech Initiatives",
-      period: "2023 – Present",
+      role: "Frontend Developer & Digital Product Designer (Independent Portfolio)",
+      organization: "Self-Directed Engineering & Campus Product Ventures",
+      period: "2022 – Present",
       bullets: [
-        "Architected and shipped 5+ responsive web applications and interactive Figma prototypes addressing student productivity, personal finance, and peer commerce.",
-        "Built reusable component libraries using React, TypeScript, and Tailwind CSS with strict attention to WCAG contrast, mobile responsiveness, and clean state management.",
-        "Collaborated with fellow Computer Science students at COOU Igbariam on algorithm study groups, code reviews, and UI usability testing.",
+        "Designed and engineered pragmatic web applications—including a Student Productivity App, Personal Finance Matrix, and COOU Peer Marketplace—blending business process clarity with modern UI craftsmanship.",
+        "Built responsive, accessible component architectures using HTML5, CSS3, Tailwind CSS, JavaScript (ES6+), and React Hooks.",
+        "Translated user research and strategic business workflows into interactive Figma design systems and working prototypes.",
       ],
     },
   ],

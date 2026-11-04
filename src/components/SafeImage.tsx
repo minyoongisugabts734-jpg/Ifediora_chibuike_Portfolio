@@ -17,10 +17,10 @@ export const SafeImage: React.FC<SafeImageProps> = ({
     return (
       <div
         role="img"
-        aria-label={alt || "Profile image"}
-        className={`bg-gradient-to-br from-surface-container-highest via-surface-container to-primary-container/40 flex flex-col items-center justify-center text-secondary font-code-inline font-semibold select-none ${className}`}
+        aria-label={alt || "Portrait image"}
+        className={`bg-gradient-to-br from-primary-fixed via-surface-container to-tertiary-fixed flex flex-col items-center justify-center text-primary font-headline-md font-bold select-none ${className}`}
       >
-        <span className="text-lg tracking-wider">{fallbackInitials}</span>
+        <span className="tracking-tight">{fallbackInitials}</span>
       </div>
     );
   }

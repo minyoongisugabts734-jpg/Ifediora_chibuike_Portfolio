@@ -2,9 +2,9 @@ import React, { useState } from "react";
 
 interface CampusListing {
   id: string;
-  initials: string;
+  badge: string;
   title: string;
-  category: "Textbooks" | "Electronics" | "Hostel Essentials";
+  category: "Course Literature" | "Electronics" | "Student Gear";
   price: number;
   sellerFaculty: string;
   meetupSpot: string;
@@ -15,46 +15,46 @@ interface CampusListing {
 const INITIAL_LISTINGS: CampusListing[] = [
   {
     id: "m1",
-    initials: "CO",
-    title: "Data Structures & Alg. in C++ (4th Edition)",
-    category: "Textbooks",
-    price: 3500,
-    sellerFaculty: "Faculty of Physical Sciences",
-    meetupSpot: "COOU University Library Entrance",
-    condition: "Clean pages · Zero highlights",
+    badge: "B.Sc",
+    title: "Principles of Business Management & Strategy (6th Ed.)",
+    category: "Course Literature",
+    price: 3800,
+    sellerFaculty: "Faculty of Management Sciences",
+    meetupSpot: "Management Sciences Quadrangle",
+    condition: "Clean copy • Gently used",
     reserved: false,
   },
   {
     id: "m2",
-    initials: "NE",
-    title: "Casio fx-991EX ClassWiz Scientific Calculator",
+    badge: "B.Sc",
+    title: "Casio fx-991EX Scientific & Financial Calculator",
     category: "Electronics",
     price: 9500,
-    sellerFaculty: "Faculty of Engineering",
-    meetupSpot: "Physical Sciences Quadrangle",
-    condition: "Solar + Battery · Tested",
+    sellerFaculty: "Department of Accountancy",
+    meetupSpot: "COOU University Library Entrance",
+    condition: "Dual power • Verified working",
     reserved: false,
   },
   {
     id: "m3",
-    initials: "AO",
-    title: "Rechargeable LED Study Desk Lamp (USB-C)",
-    category: "Hostel Essentials",
+    badge: "400L",
+    title: "Rechargeable USB-C LED Desk Study Lamp",
+    category: "Student Gear",
     price: 5200,
-    sellerFaculty: "Department of Computer Science",
+    sellerFaculty: "Department of Business Admin",
     meetupSpot: "Igbariam Student Center",
-    condition: "8-hour backup battery",
+    condition: "8-hour battery backup",
     reserved: false,
   },
   {
     id: "m4",
-    initials: "UC",
-    title: "Discrete Mathematics & Its Applications (Rosen)",
-    category: "Textbooks",
-    price: 4200,
-    sellerFaculty: "Department of Mathematics",
-    meetupSpot: "Science Lecture Theatre Hall B",
-    condition: "Hardcover · Mint",
+    badge: "300L",
+    title: "Quantitative Analysis & Operations Research Manual",
+    category: "Course Literature",
+    price: 3000,
+    sellerFaculty: "Faculty of Management Sciences",
+    meetupSpot: "Faculty Lecture Hall B",
+    condition: "Includes past tutorial solutions",
     reserved: false,
   },
 ];
@@ -68,11 +68,11 @@ export const MarketplaceDemo: React.FC = () => {
   const [messages, setMessages] = useState<{ sender: "you" | "seller"; text: string }[]>([
     {
       sender: "seller",
-      text: "Hi fellow COOUite! This item is still available for campus inspection today.",
+      text: "Hello fellow COOU scholar! This item is available for inspection on campus today.",
     },
   ]);
 
-  const categories = ["All", "Textbooks", "Electronics", "Hostel Essentials"];
+  const categories = ["All", "Course Literature", "Electronics", "Student Gear"];
 
   const filtered = listings.filter((item) => {
     const matchesCategory = activeCategory === "All" || item.category === activeCategory;
@@ -100,25 +100,25 @@ export const MarketplaceDemo: React.FC = () => {
       { sender: "you", text },
       {
         sender: "seller",
-        text: `Sounds great! Let's meet at ${selectedItem.meetupSpot} between lectures.`,
+        text: `Awesome! We can meet at ${selectedItem.meetupSpot} right after lectures.`,
       },
     ]);
     setChatMessage("");
   };
 
   return (
-    <div className="bg-surface-container-low rounded-3xl p-6 lg:p-8 shadow-xl border border-outline-variant/20 space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-outline-variant/20">
+    <div className="bg-surface-container-low rounded-2xl p-space-md lg:p-space-xl shadow-sm space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-outline-variant/40">
         <div className="flex items-center gap-3">
-          <span className="h-10 w-10 rounded-xl bg-surface-container-highest flex items-center justify-center text-secondary">
-            <span className="material-symbols-outlined text-[22px]">shopping_bag</span>
-          </span>
+          <div className="w-10 h-10 rounded-xl bg-tertiary-fixed flex items-center justify-center text-tertiary">
+            <span className="material-symbols-outlined text-[22px]">storefront</span>
+          </div>
           <div>
-            <div className="font-label-sm text-label-sm text-secondary uppercase">
-              Peer Commerce P2P · Interactive Prototype
+            <div className="font-mono text-[11px] font-bold text-tertiary uppercase">
+              P2P EXCHANGE • INTERACTIVE PROTOTYPE
             </div>
-            <h3 className="font-headline-sm text-headline-sm text-on-surface font-semibold">
-              COOU Igbariam Verified Campus Exchange
+            <h3 className="font-headline-sm text-headline-sm text-on-surface font-bold">
+              COOU Peer Marketplace
             </h3>
           </div>
         </div>
@@ -129,10 +129,10 @@ export const MarketplaceDemo: React.FC = () => {
               key={cat}
               type="button"
               onClick={() => setActiveCategory(cat)}
-              className={`px-3.5 py-1.5 rounded-lg font-label-md text-label-md transition-colors cursor-pointer whitespace-nowrap ${
+              className={`px-3.5 py-1.5 rounded-lg font-label-sm text-label-sm font-semibold transition-colors cursor-pointer whitespace-nowrap ${
                 activeCategory === cat
-                  ? "bg-primary-container text-on-primary-container"
-                  : "bg-surface-container text-on-surface-variant hover:text-on-surface"
+                  ? "bg-tertiary-container text-on-tertiary shadow-sm"
+                  : "bg-surface-container-lowest text-on-surface-variant hover:text-on-surface"
               }`}
             >
               {cat}
@@ -150,14 +150,14 @@ export const MarketplaceDemo: React.FC = () => {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search textbooks, calculators, study lamps, or faculty..."
-          aria-label="Search campus marketplace listings"
-          className="w-full bg-surface-container text-on-surface placeholder:text-outline pl-11 pr-4 py-3 rounded-xl font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-secondary"
+          placeholder="Search course literature, calculators, study lamps, or faculty..."
+          aria-label="Search COOU peer marketplace"
+          className="w-full bg-surface-container-lowest text-on-surface placeholder:text-outline pl-11 pr-4 py-3 rounded-xl font-body-sm text-body-sm shadow-sm outline-none focus:ring-2 focus:ring-tertiary-container"
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left: Listings Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
+        {/* Left: Listings */}
         <div className="lg:col-span-7 space-y-3">
           {filtered.map((item) => {
             const isSelected = selectedItem.id === item.id;
@@ -165,48 +165,50 @@ export const MarketplaceDemo: React.FC = () => {
               <div
                 key={item.id}
                 onClick={() => setSelectedItem(item)}
-                className={`p-4 rounded-2xl transition-all cursor-pointer ${
+                className={`p-4 rounded-xl bg-surface-container-lowest transition-all cursor-pointer ${
                   isSelected
-                    ? "bg-surface-container-high ring-1 ring-secondary/60 shadow-lg"
-                    : "bg-surface-container hover:bg-surface-container-high"
+                    ? "ring-2 ring-tertiary-container shadow-md"
+                    : "shadow-sm hover:shadow-md"
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <span className="h-9 w-9 rounded-full bg-secondary-container/30 flex items-center justify-center font-code-inline text-xs text-secondary font-bold shrink-0">
-                      {item.initials}
-                    </span>
+                    <div className="w-10 h-10 rounded-lg bg-tertiary-fixed flex items-center justify-center text-tertiary font-mono text-xs font-bold shrink-0">
+                      {item.badge}
+                    </div>
                     <div>
-                      <h4 className="font-body-md text-body-md font-semibold text-on-surface">
+                      <h4 className="font-body-md text-body-md font-bold text-on-surface">
                         {item.title}
                       </h4>
-                      <p className="font-label-sm text-label-sm text-outline">
-                        Seller: {item.sellerFaculty} · {item.condition}
+                      <p className="font-label-sm text-label-sm text-on-surface-variant">
+                        {item.sellerFaculty} • {item.condition}
                       </p>
                     </div>
                   </div>
-                  <span className="font-code-inline text-sm font-bold text-secondary shrink-0 tabular-nums">
+                  <span className="font-mono text-sm font-bold text-tertiary shrink-0 tabular-nums">
                     ₦{item.price.toLocaleString()}
                   </span>
                 </div>
 
-                <div className="flex flex-wrap items-center justify-between gap-2 mt-3 pt-3 border-t border-outline-variant/15">
-                  <div className="flex flex-wrap items-center gap-3 text-xs text-on-surface-variant">
-                    <span className="inline-flex items-center gap-1 text-primary font-label-sm">
-                      <span className="material-symbols-outlined text-[14px]">verified</span>
-                      Verified Student
+                <div className="flex flex-wrap items-center justify-between gap-2 mt-3 pt-2.5 border-t border-outline-variant/30">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <span className="inline-flex items-center gap-1 font-label-sm text-label-sm text-tertiary font-semibold">
+                      <span className="material-symbols-outlined text-[15px]">verified</span>
+                      Verified COOU Student
                     </span>
-                    <span className="inline-flex items-center gap-1 font-label-sm">
-                      <span className="material-symbols-outlined text-[14px]">near_me</span>
+                    <span className="inline-flex items-center gap-1 font-label-sm text-label-sm text-on-surface-variant">
+                      <span className="material-symbols-outlined text-[15px]">location_on</span>
                       {item.meetupSpot}
                     </span>
                   </div>
                   <span
-                    className={`font-label-sm text-label-sm ${
-                      item.reserved ? "text-tertiary" : "text-secondary"
+                    className={`px-2 py-0.5 rounded font-mono text-[11px] font-bold ${
+                      item.reserved
+                        ? "bg-primary-fixed text-primary"
+                        : "bg-tertiary-fixed text-tertiary"
                     }`}
                   >
-                    {item.reserved ? "Escrow Reserved" : "Available"}
+                    {item.reserved ? "Reserved" : "Available"}
                   </span>
                 </div>
               </div>
@@ -214,27 +216,27 @@ export const MarketplaceDemo: React.FC = () => {
           })}
 
           {filtered.length === 0 && (
-            <div className="bg-surface-container rounded-2xl p-8 text-center text-on-surface-variant font-body-sm">
-              No campus listings match &ldquo;{query}&rdquo;. Try clearing your search filter.
+            <div className="bg-surface-container-lowest rounded-xl p-8 text-center text-on-surface-variant font-body-sm shadow-sm">
+              No campus listings match &ldquo;{query}&rdquo;.
             </div>
           )}
         </div>
 
-        {/* Right: Escrow & Instant Campus Chat */}
-        <div className="lg:col-span-5 bg-surface-container rounded-2xl p-6 space-y-5">
-          <div className="flex items-start justify-between gap-2 pb-4 border-b border-outline-variant/20">
+        {/* Right: Inspection & Peer Messaging */}
+        <div className="lg:col-span-5 bg-surface-container-lowest rounded-xl p-space-lg shadow-sm space-y-5">
+          <div className="flex items-start justify-between gap-2 pb-4 border-b border-outline-variant/30">
             <div>
-              <span className="font-label-sm text-label-sm text-secondary uppercase">
-                Selected Listing
+              <span className="font-mono text-[11px] font-bold text-tertiary uppercase">
+                Listing Details
               </span>
-              <h4 className="font-headline-sm text-headline-sm text-on-surface font-semibold mt-0.5">
+              <h4 className="font-headline-sm text-headline-sm text-on-surface font-bold mt-0.5">
                 {selectedItem.title}
               </h4>
-              <p className="font-label-sm text-label-sm text-outline mt-1">
-                Safe Meetup: {selectedItem.meetupSpot}
+              <p className="font-label-sm text-label-sm text-on-surface-variant mt-1">
+                Handover Point: {selectedItem.meetupSpot}
               </p>
             </div>
-            <span className="font-code-inline text-base font-bold text-secondary tabular-nums">
+            <span className="font-mono text-base font-bold text-tertiary tabular-nums">
               ₦{selectedItem.price.toLocaleString()}
             </span>
           </div>
@@ -242,35 +244,34 @@ export const MarketplaceDemo: React.FC = () => {
           <button
             type="button"
             onClick={() => toggleReserve(selectedItem.id)}
-            className={`w-full py-3 px-4 rounded-xl font-label-md text-label-md font-semibold transition-all cursor-pointer flex items-center justify-center gap-2 ${
+            className={`w-full py-3 px-4 rounded-lg font-label-md text-label-md font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
               selectedItem.reserved
-                ? "bg-surface-container-highest text-tertiary"
-                : "bg-primary-container hover:bg-inverse-primary text-on-primary-container shadow-[0_0_20px_rgba(37,99,235,0.35)]"
+                ? "bg-surface-container text-on-surface"
+                : "bg-tertiary-container hover:bg-tertiary text-on-tertiary shadow-sm"
             }`}
           >
             <span className="material-symbols-outlined text-[18px]">
-              {selectedItem.reserved ? "lock" : "shield_lock"}
+              {selectedItem.reserved ? "check_circle" : "verified_user"}
             </span>
             <span>
               {selectedItem.reserved
-                ? "Reserved in Student Escrow (Click to Release)"
-                : "Hold in Campus Escrow · ₦" + selectedItem.price.toLocaleString()}
+                ? "Reserved for Campus Pickup (Click to Cancel)"
+                : `Reserve for Campus Inspection • ₦${selectedItem.price.toLocaleString()}`}
             </span>
           </button>
 
-          {/* Chat Thread */}
           <div className="space-y-3">
-            <span className="font-label-sm text-label-sm text-outline uppercase">
-              Instant Student Chat
+            <span className="font-label-sm text-label-sm text-outline uppercase font-semibold">
+              Direct Peer Chat
             </span>
-            <div className="bg-surface-container-lowest rounded-xl p-3.5 space-y-2.5 max-h-44 overflow-y-auto">
+            <div className="bg-surface-container-low rounded-xl p-3.5 space-y-2.5 max-h-44 overflow-y-auto">
               {messages.map((msg, idx) => (
                 <div
                   key={idx}
                   className={`p-2.5 rounded-lg font-body-sm text-xs leading-relaxed ${
                     msg.sender === "you"
-                      ? "bg-primary-container/25 text-on-surface ml-6"
-                      : "bg-surface-container text-on-surface-variant mr-6"
+                      ? "bg-primary-container text-on-primary ml-6"
+                      : "bg-surface-container-lowest text-on-surface shadow-sm mr-6"
                   }`}
                 >
                   {msg.text}
@@ -282,14 +283,14 @@ export const MarketplaceDemo: React.FC = () => {
                 type="text"
                 value={chatMessage}
                 onChange={(e) => setChatMessage(e.target.value)}
-                placeholder="Ask seller about meetup time..."
-                aria-label="Message seller"
-                className="flex-1 bg-surface-container-lowest text-on-surface placeholder:text-outline px-3 py-2 rounded-xl font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-secondary"
+                placeholder="Coordinate campus meetup..."
+                aria-label="Message student seller"
+                className="flex-1 bg-surface-container-low text-on-surface placeholder:text-outline px-3 py-2 rounded-lg font-body-sm text-body-sm outline-none focus:ring-2 focus:ring-tertiary-container"
               />
               <button
                 type="submit"
-                className="px-3.5 py-2 rounded-xl bg-surface-container-highest hover:bg-primary-container text-on-surface hover:text-on-primary-container transition-colors cursor-pointer"
-                aria-label="Send chat message"
+                className="px-3.5 py-2 rounded-lg bg-primary-container hover:bg-primary text-on-primary transition-colors cursor-pointer"
+                aria-label="Send message"
               >
                 <span className="material-symbols-outlined text-[18px]">send</span>
               </button>

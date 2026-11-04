@@ -11,47 +11,47 @@ interface CourseTask {
 const INITIAL_TASKS: CourseTask[] = [
   {
     id: "t1",
-    courseCode: "CMP 312",
-    title: "Implement Dijkstra Shortest-Path Lab Report",
-    dueLabel: "Today · 5:00 PM",
+    courseCode: "BUS 401",
+    title: "Strategic Management Case Analysis Brief",
+    dueLabel: "Today • 5:00 PM",
     completed: true,
   },
   {
     id: "t2",
-    courseCode: "CMP 304",
-    title: "Relational Schema Normalization Exercise (3NF)",
-    dueLabel: "Tomorrow · 11:00 AM",
+    courseCode: "BUS 412",
+    title: "Quantitative Operations Research Problem Set",
+    dueLabel: "Tomorrow • 11:00 AM",
     completed: false,
   },
   {
     id: "t3",
-    courseCode: "MTH 301",
-    title: "Discrete Graph Coloring Problem Set",
-    dueLabel: "Thu · 2:00 PM",
+    courseCode: "DEV LAB",
+    title: "Refactor React Dashboard State & Tailwind Tokens",
+    dueLabel: "Thu • 3:00 PM",
     completed: false,
   },
   {
     id: "t4",
-    courseCode: "CMP 318",
-    title: "UI Wireframe Prototype Review on Figma",
-    dueLabel: "Fri · 4:00 PM",
+    courseCode: "BUS 418",
+    title: "Organizational Behavior Seminar Presentation",
+    dueLabel: "Fri • 1:00 PM",
     completed: false,
   },
 ];
 
 const PRESETS = [
-  { label: "Pomodoro Focus", seconds: 25 * 60 },
-  { label: "Short Break", seconds: 5 * 60 },
-  { label: "Exam Sprint", seconds: 45 * 60 },
+  { label: "Pomodoro (25m)", seconds: 25 * 60 },
+  { label: "Short Break (5m)", seconds: 5 * 60 },
+  { label: "Deep Sprint (45m)", seconds: 45 * 60 },
 ];
 
 export const ProductivityDemo: React.FC = () => {
   const [tasks, setTasks] = useState<CourseTask[]>(INITIAL_TASKS);
   const [activePresetIdx, setActivePresetIdx] = useState(0);
-  const [secondsLeft, setSecondsLeft] = useState(24 * 60 + 15);
+  const [secondsLeft, setSecondsLeft] = useState(25 * 60);
   const [isRunning, setIsRunning] = useState(false);
-  const [activeCourse, setActiveCourse] = useState("CMP 312: Algorithms");
-  const [newCourseCode, setNewCourseCode] = useState("CMP 322");
+  const [activeCourse, setActiveCourse] = useState("BUS 401 • Strategic Management");
+  const [newCourseCode, setNewCourseCode] = useState("BUS 405");
   const [newTaskTitle, setNewTaskTitle] = useState("");
 
   useEffect(() => {
@@ -91,7 +91,7 @@ export const ProductivityDemo: React.FC = () => {
     if (!newTaskTitle.trim()) return;
     const item: CourseTask = {
       id: `t-${Date.now()}`,
-      courseCode: newCourseCode.trim().toUpperCase() || "CMP 300",
+      courseCode: newCourseCode.trim().toUpperCase() || "COURSE",
       title: newTaskTitle.trim(),
       dueLabel: "This Week",
       completed: false,
@@ -101,31 +101,32 @@ export const ProductivityDemo: React.FC = () => {
   };
 
   return (
-    <div className="bg-surface-container-low rounded-3xl p-6 lg:p-8 shadow-xl border border-outline-variant/20">
-      <div className="flex flex-wrap items-center justify-between gap-4 pb-6 mb-6 border-b border-outline-variant/20">
+    <div className="bg-surface-container-low rounded-2xl p-space-md lg:p-space-xl shadow-sm space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-outline-variant/40">
         <div className="flex items-center gap-3">
-          <span className="h-10 w-10 rounded-xl bg-surface-container-highest flex items-center justify-center text-secondary">
+          <div className="w-10 h-10 rounded-xl bg-primary-fixed flex items-center justify-center text-primary">
             <span className="material-symbols-outlined text-[22px]">timer</span>
-          </span>
+          </div>
           <div>
-            <div className="font-label-sm text-label-sm text-secondary uppercase">
-              Academic Suite v1.2 · Interactive Sandbox
+            <div className="font-mono text-[11px] font-bold text-primary uppercase">
+              v1.2.0 • ACADEMIC TOOL SANDBOX
             </div>
-            <h3 className="font-headline-sm text-headline-sm text-on-surface font-semibold">
-              COOU Study &amp; Assignment Workspace
+            <h3 className="font-headline-sm text-headline-sm text-on-surface font-bold">
+              Pomodoro &amp; Semester Milestone Tracker
             </h3>
           </div>
         </div>
+
         <div className="flex flex-wrap gap-2">
           {PRESETS.map((preset, idx) => (
             <button
               key={preset.label}
               type="button"
               onClick={() => selectPreset(idx)}
-              className={`px-3.5 py-1.5 rounded-lg font-label-md text-label-md transition-colors cursor-pointer whitespace-nowrap ${
+              className={`px-3.5 py-1.5 rounded-lg font-label-sm text-label-sm font-semibold transition-colors cursor-pointer whitespace-nowrap ${
                 activePresetIdx === idx
-                  ? "bg-primary-container text-on-primary-container shadow-sm"
-                  : "bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high"
+                  ? "bg-primary-container text-on-primary shadow-sm"
+                  : "bg-surface-container-lowest text-on-surface-variant hover:text-on-surface"
               }`}
             >
               {preset.label}
@@ -134,15 +135,15 @@ export const ProductivityDemo: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left: Pomodoro Focus Module */}
-        <div className="lg:col-span-5 bg-surface-container rounded-2xl p-6 shadow-md space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
+        {/* Left: Pomodoro Study Cycle */}
+        <div className="lg:col-span-5 bg-surface-container-lowest rounded-xl p-space-lg shadow-sm space-y-5">
           <div className="flex items-center justify-between">
-            <span className="font-label-md text-label-md text-on-surface-variant">
-              Active Session Course
+            <span className="font-label-sm text-label-sm text-on-surface-variant font-semibold">
+              Active Study Cycle
             </span>
-            <span className="font-code-inline text-xs text-tertiary bg-surface-container-low px-2.5 py-1 rounded-md">
-              {isRunning ? "Session Active" : "Paused"}
+            <span className="px-2.5 py-0.5 rounded bg-primary-fixed text-primary font-mono text-[11px] font-bold">
+              {isRunning ? "RUNNING" : "READY"}
             </span>
           </div>
 
@@ -150,21 +151,23 @@ export const ProductivityDemo: React.FC = () => {
             value={activeCourse}
             onChange={(e) => setActiveCourse(e.target.value)}
             aria-label="Select active study course"
-            className="w-full bg-surface-container-lowest text-on-surface px-3.5 py-2.5 rounded-xl font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-secondary"
+            className="w-full px-3.5 py-2.5 rounded-lg bg-surface-container-low text-on-surface font-body-sm text-body-sm outline-none focus:ring-2 focus:ring-primary-container"
           >
-            <option value="CMP 312: Algorithms">CMP 312: Algorithms</option>
-            <option value="CMP 304: Database Systems">CMP 304: Database Systems</option>
-            <option value="MTH 301: Discrete Structures">MTH 301: Discrete Structures</option>
-            <option value="CMP 318: Human-Computer Interaction">
-              CMP 318: Human-Computer Interaction
+            <option value="BUS 401 • Strategic Management">BUS 401 • Strategic Management</option>
+            <option value="BUS 412 • Operations Research">BUS 412 • Operations Research</option>
+            <option value="DEV LAB • React & UI Architecture">
+              DEV LAB • React &amp; UI Architecture
+            </option>
+            <option value="BUS 418 • Organizational Behavior">
+              BUS 418 • Organizational Behavior
             </option>
           </select>
 
-          <div className="bg-surface-container-lowest rounded-2xl py-8 px-4 text-center">
-            <div className="font-code-inline text-5xl sm:text-6xl font-bold text-on-surface tracking-tight tabular-nums">
+          <div className="bg-surface-container-low rounded-xl py-8 px-4 text-center">
+            <div className="font-mono text-5xl sm:text-6xl font-bold text-on-surface tracking-tight tabular-nums">
               {formatTime(secondsLeft)}
             </div>
-            <p className="font-label-sm text-label-sm text-outline mt-2 uppercase tracking-wider">
+            <p className="font-label-sm text-label-sm text-on-surface-variant mt-2">
               {activeCourse}
             </p>
           </div>
@@ -173,12 +176,12 @@ export const ProductivityDemo: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsRunning((r) => !r)}
-              className="flex-1 inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-primary-container text-on-primary-container font-label-md text-label-md font-semibold hover:bg-inverse-primary transition-colors cursor-pointer"
+              className="flex-1 inline-flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md shadow-sm transition-colors cursor-pointer"
             >
               <span className="material-symbols-outlined text-[18px]">
                 {isRunning ? "pause" : "play_arrow"}
               </span>
-              <span>{isRunning ? "Pause Timer" : "Start Focus"}</span>
+              <span>{isRunning ? "Pause Cycle" : "Start Study Cycle"}</span>
             </button>
             <button
               type="button"
@@ -186,27 +189,27 @@ export const ProductivityDemo: React.FC = () => {
                 setIsRunning(false);
                 setSecondsLeft(PRESETS[activePresetIdx].seconds);
               }}
-              className="py-3 px-4 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label-md text-label-md transition-colors cursor-pointer"
+              className="py-3 px-4 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md transition-colors cursor-pointer"
             >
               Reset
             </button>
           </div>
         </div>
 
-        {/* Right: Course Assignment Queue */}
-        <div className="lg:col-span-7 bg-surface-container rounded-2xl p-6 shadow-md space-y-5">
+        {/* Right: Milestone & Deadline Checklist */}
+        <div className="lg:col-span-7 bg-surface-container-lowest rounded-xl p-space-lg shadow-sm space-y-5">
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <span className="font-headline-sm text-headline-sm text-on-surface font-semibold">
-                Assignment Queue
+              <span className="font-headline-sm text-headline-sm text-on-surface font-bold">
+                Semester Milestones
               </span>
-              <span className="font-code-inline text-xs text-secondary tabular-nums">
-                {remainingCount} tasks remaining · {progressPercent}% daily goal
+              <span className="font-mono text-xs text-primary font-bold tabular-nums">
+                {remainingCount} pending • {progressPercent}% complete
               </span>
             </div>
-            <div className="w-full bg-surface-container-lowest h-2 rounded-full overflow-hidden">
+            <div className="w-full bg-surface-container h-2 rounded-full overflow-hidden">
               <div
-                className="bg-secondary h-full rounded-full transition-all duration-300"
+                className="bg-primary-container h-full rounded-full transition-all duration-300"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
@@ -217,24 +220,24 @@ export const ProductivityDemo: React.FC = () => {
               type="text"
               value={newCourseCode}
               onChange={(e) => setNewCourseCode(e.target.value)}
-              placeholder="CMP 322"
+              placeholder="BUS 405"
               maxLength={10}
               aria-label="Course code"
-              className="sm:w-28 bg-surface-container-lowest text-on-surface placeholder:text-outline px-3 py-2.5 rounded-xl font-code-inline text-xs focus:outline-none focus:ring-2 focus:ring-secondary"
+              className="sm:w-28 px-3 py-2.5 rounded-lg bg-surface-container-low text-on-surface font-mono text-xs outline-none focus:ring-2 focus:ring-primary-container"
             />
             <input
               type="text"
               value={newTaskTitle}
               onChange={(e) => setNewTaskTitle(e.target.value)}
-              placeholder="Add new assignment or study milestone..."
-              aria-label="Assignment title"
-              className="flex-1 bg-surface-container-lowest text-on-surface placeholder:text-outline px-3.5 py-2.5 rounded-xl font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-secondary"
+              placeholder="Add assignment or project deadline..."
+              aria-label="Task title"
+              className="flex-1 px-3.5 py-2.5 rounded-lg bg-surface-container-low text-on-surface font-body-sm text-body-sm outline-none focus:ring-2 focus:ring-primary-container"
             />
             <button
               type="submit"
-              className="px-4 py-2.5 rounded-xl bg-surface-container-highest hover:bg-primary-container text-on-surface hover:text-on-primary-container font-label-md text-label-md transition-colors cursor-pointer whitespace-nowrap"
+              className="px-4 py-2.5 rounded-lg bg-primary-fixed hover:bg-primary-container text-primary hover:text-on-primary font-label-md text-label-md transition-colors cursor-pointer whitespace-nowrap"
             >
-              + Add Task
+              + Add Milestone
             </button>
           </form>
 
@@ -249,12 +252,12 @@ export const ProductivityDemo: React.FC = () => {
                     )
                   )
                 }
-                className="flex items-center justify-between gap-3 p-3.5 rounded-xl bg-surface-container-low hover:bg-surface-container-high transition-colors cursor-pointer"
+                className="flex items-center justify-between gap-3 p-3 rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <span
                     className={`material-symbols-outlined text-[20px] shrink-0 ${
-                      task.completed ? "text-secondary" : "text-outline"
+                      task.completed ? "text-primary-container" : "text-outline"
                     }`}
                   >
                     {task.completed ? "check_circle" : "radio_button_unchecked"}
@@ -267,8 +270,8 @@ export const ProductivityDemo: React.FC = () => {
                     >
                       {task.title}
                     </div>
-                    <div className="font-label-sm text-label-sm text-outline">
-                      {task.courseCode} · Due {task.dueLabel}
+                    <div className="font-label-sm text-label-sm text-on-surface-variant">
+                      {task.courseCode} • {task.dueLabel}
                     </div>
                   </div>
                 </div>
